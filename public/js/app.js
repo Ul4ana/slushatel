@@ -161,7 +161,8 @@ function handleSwipe() {
 export function updateDrawerProfile(user) {
   if (!user) return;
   renderAvatar(user, 'drawer-avatar');
-  document.getElementById('drawer-nick').textContent = user.nickname;
+  // ИСПРАВЛЕНО: Жестко берем реальный никнейм
+  document.getElementById('drawer-nick').textContent = user.nickname || 'Пользователь';
   
   if (user.created_at) {
     const date = new Date(user.created_at);
@@ -175,7 +176,21 @@ export function updateDrawerProfile(user) {
 }
 
 // ==========================================
-// МОДАЛЬНЫЕ ОКНА (ИДЕАЛЬНОЕ ЦЕНТРИРОВАНИЕ)
+// ОБНОВЛЕНИЕ ДИАПАЗОНА ВОЗРАСТА
+// ==========================================
+const minAgeSelect = document.getElementById('min-age');
+const maxAgeSelect = document.getElementById('max-age');
+
+function updateAgeDisplay() {
+  // Можно добавить визуальное отображение, если нужно
+  // Например: document.getElementById('age-val').textContent = `${minAgeSelect.value}-${maxAgeSelect.value}`;
+}
+
+minAgeSelect?.addEventListener('change', updateAgeDisplay);
+maxAgeSelect?.addEventListener('change', updateAgeDisplay);
+
+// ==========================================
+// МОДАЛЬНЫЕ ОКНА (ОБНОВЛЕННЫЙ ТЕКСТ "О ПРОЕКТЕ")
 // ==========================================
 const modalOverlay = document.getElementById('modal-overlay');
 const modalTitle = document.getElementById('modal-title');
@@ -206,7 +221,7 @@ document.querySelectorAll('.drawer-item').forEach(item => {
     const user = getCurrentUser() || {};
     
     if (type === 'profile') {
-      // ИСПРАВЛЕНО: Берем реальный никнейм, а не слово "Никнейм"
+      // ИСПРАВЛЕНО: Реальный никнейм пользователя
       const realNick = user.nickname || 'Пользователь';
       const date = user.created_at ? new Date(user.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Неизвестно';
       
@@ -223,7 +238,6 @@ document.querySelectorAll('.drawer-item').forEach(item => {
         </div>
       `, `<button class="btn-primary" onclick="document.getElementById('modal-overlay').classList.add('hidden')" style="max-width: 200px; margin: 0 auto;">Закрыть</button>`);
       
-      // Небольшая задержка, чтобы элемент успел отрисоваться перед рендером аватара
       setTimeout(() => renderAvatar(user, 'modal-profile-avatar'), 50);
     }
     
@@ -269,12 +283,35 @@ document.querySelectorAll('.drawer-item').forEach(item => {
       `, `<button class="btn-primary modal-sos-btn" onclick="window.open('tel:88002000122')">📞 Позвонить: 8-800-2000-122</button>`);
     }
     
+    // ОБНОВЛЕНО: Новый текст "О проекте"
     else if (type === 'about') {
       openModal('О проекте', `
-        <h4>Слушатель</h4>
-        <p>Анонимная платформа peer-поддержки для подростков. Создана как социальный проект в 2026 году.</p>
-        <p>Наша цель — дать каждому безопасное пространство, где его услышат без оценок и давления. Потому что иногда всё, что нужно — это чтобы кто-то просто был рядом.</p>
-      `, `<button class="btn-primary" onclick="document.getElementById('modal-overlay').classList.add('hidden')" style="max-width: 200px; margin: 0 auto;">Закрыть</button>`);
+        <div style="text-align: left; line-height: 1.8; font-size: 15px;">
+          <p style="margin-bottom: 20px;">
+            <strong>«Слушатель»</strong> — это анонимное пространство, где подростки могут выговориться, а другие подростки — просто быть рядом и слушать.
+          </p>
+          <p style="margin-bottom: 20px;">
+            Идея родилась не в кабинете и не из учебника. Она родилась из понимания: в нашем Ленинском районе слишком много тех, кто остаётся один со своей болью. К психологу идти страшно — осудят. К родителям — не поймут. К друзьям — а вдруг растрепают. А телефон всегда под рукой.
+          </p>
+          <p style="margin-bottom: 24px;">
+            Здесь нет советов, нет оценок, нет осуждения. Здесь есть только человек, который прошёл короткий курс, чтобы научиться главному — слушать. Без перебивания. Без «всё будет хорошо». Без «а вот у меня было хуже». Просто быть рядом.
+          </p>
+          
+          <hr class="divider" style="margin: 28px 0;">
+          
+          <div style="text-align: center; margin-bottom: 24px;">
+            <p style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Автор проекта:</p>
+            <p style="margin-bottom: 4px;">Медведева Ульяна,</p>
+            <p style="margin-bottom: 4px;">ученица 9 класса,</p>
+            <p>Ленинский район, г. Новосибирск, 2026 год.</p>
+          </div>
+        </div>
+      `, `
+        <p style="font-size: 11px; color: var(--text-muted); line-height: 1.5; text-align: left; margin-bottom: 16px; padding: 12px; background-color: var(--bg-secondary); border-radius: var(--radius-sm);">
+          Приложение «Слушатель» создано как социальный подростковый проект и не является медицинской или психотерапевтической услугой. Оно не заменяет консультацию квалифицированного психолога, психотерапевта или врача. В случае острого кризисного состояния, угрозы жизни или здоровью — немедленно обратитесь за профессиональной помощью по телефону доверия: <strong>8-800-2000-122</strong> (бесплатно, круглосуточно, анонимно) или по единому номеру экстренных служб <strong>112</strong>.
+        </p>
+        <button class="btn-primary" onclick="document.getElementById('modal-overlay').classList.add('hidden')" style="max-width: 200px; margin: 0 auto;">Закрыть</button>
+      `);
     }
   });
 });
