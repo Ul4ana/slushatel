@@ -1,9 +1,8 @@
-import { showScreen, socket, currentUser, token, renderAvatar } from './app.js';
+import { showScreen, socket, getToken, getCurrentUser, setCurrentUser, renderAvatar } from './app.js';
 
 let currentSession = null;
 
 export function initChat() {
-  // 1. Настраиваем кнопки (только если они есть на странице)
   const findBtn = document.getElementById('find-listener');
   if (findBtn) findBtn.addEventListener('click', findListener);
   
@@ -33,7 +32,6 @@ export function initChat() {
   const reportBtn = document.getElementById('report-btn');
   if (reportBtn) reportBtn.addEventListener('click', showReportModal);
 
-  // 2. БЕЗОПАСНЫЕ подписки на события Socket (теперь они внутри функции)
   socket.on('session-request', (data) => {
     showModal('Кто-то хочет поговорить', 'Ты нужен.', [
       { text: 'Принять', action: () => {
@@ -64,9 +62,10 @@ export function initChat() {
   socket.on('new-message', (data) => {
     const container = document.getElementById('chat-messages');
     if (!container) return;
+    const user = getCurrentUser();
     const div = document.createElement('div');
-    div.className = `message ${data.senderId === currentUser.id ? 'mine' : (data.senderId === 'system' ? 'system' : 'theirs')}`;
-    div.textContent = data.text; // Защита от XSS
+    div.className = `message ${data.senderId === user.id ? 'mine' : (data.senderId === 'system' ? 'system' : 'theirs')}`;
+    div.textContent = data.text;
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
   });
@@ -78,6 +77,7 @@ export function initChat() {
   socket.on('user-banned', (data) => {
     alert(`Твой аккаунт ограничен: ${data.type} бан на ${data.duration}.`);
     localStorage.removeItem('token');
+    localStorage.removeItem('currentUser');
     window.location.reload();
   });
 }
@@ -86,10 +86,11 @@ export function initProfile() {
   const openProfBtn = document.getElementById('open-profile');
   if (openProfBtn) {
     openProfBtn.addEventListener('click', () => {
-      document.getElementById('prof-nick').value = currentUser.nickname;
-      document.getElementById('prof-age').value = currentUser.age;
-      document.getElementById('prof-gender').value = currentUser.gender;
-      renderAvatar(currentUser, 'profile-avatar');
+      const user = getCurrentUser();
+      document.getElementById('prof-nick').value = user.nickname;
+      document.getElementById('prof-age').value = user.age;
+      document.getElementById('prof-gender').value = user.gender;
+      renderAvatar(user, 'profile-avatar');
       showScreen('profile-screen');
     });
   }
@@ -101,22 +102,30 @@ export function initProfile() {
   if (profForm) {
     profForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const user = getCurrentUser();
       const payload = {
         nickname: document.getElementById('prof-nick').value,
         age: parseInt(document.getElementById('prof-age').value),
         gender: document.getElementById('prof-gender').value,
-        avatar_type: currentUser.avatar_type,
-        avatar_bg_color: currentUser.avatar_bg_color,
-        avatar_content: currentUser.avatar_content
+        avatar_type: user.avatar_type,
+        avatar_bg_color: user.avatar_bg_color,
+        avatar_content: user.avatar_content
       };
-      await fetch('/api/profile', {
+      
+      const token = getToken();
+      const res = await fetch('/api/profile', {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      alert('Профиль обновлен');
-      currentUser = { ...currentUser, ...payload };
-      renderAvatar(currentUser, 'profile-avatar');
+      
+      if (res.ok) {
+        alert('Профиль обновлен');
+        setCurrentUser({ ...user, ...payload });
+        renderAvatar({ ...user, ...payload }, 'profile-avatar');
+      } else {
+        alert('Ошибка обновления профиля');
+      }
     });
   }
 
@@ -136,6 +145,7 @@ async function findListener() {
     return;
   }
 
+  const token = getToken();
   const res = await fetch(`/api/online-listeners?prefGender=${document.getElementById('pref-gender').value}&minAge=${minAge}&maxAge=${maxAge}`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -155,7 +165,8 @@ async function findListener() {
 
 function requestSession(listenerId, mode) {
   closeModal();
-  socket.emit('request-session', { storytellerId: currentUser.id, listenerId, mode });
+  const user = getCurrentUser();
+  socket.emit('request-session', { storytellerId: user.id, listenerId, mode });
   showModal('Поиск', 'Отправляем запрос слушателю...', []);
 }
 
@@ -172,15 +183,20 @@ function rejectSession(sessionId, reason) {
 function startSession(sessionId, mode) {
   currentSession = { id: sessionId, mode };
   showScreen('chat-screen');
-  document.getElementById('chat-messages').innerHTML = '';
+  const chatMessages = document.getElementById('chat-messages');
+  if (chatMessages) chatMessages.innerHTML = '';
   
-  if (currentUser.is_listener) {
-    document.getElementById('listener-status').classList.remove('hidden');
-    document.getElementById('storyteller-panel').classList.add('hidden');
+  const user = getCurrentUser();
+  if (user.is_listener) {
+    const ls = document.getElementById('listener-status');
+    if (ls) ls.classList.remove('hidden');
+    const sp = document.getElementById('storyteller-panel');
+    if (sp) sp.classList.add('hidden');
   }
 
-  if (!currentUser.is_listener) {
-    document.getElementById('sos-btn').classList.remove('hidden');
+  if (!user.is_listener) {
+    const sos = document.getElementById('sos-btn');
+    if (sos) sos.classList.remove('hidden');
   }
 }
 
@@ -189,18 +205,19 @@ function sendMessage() {
   const text = input.value.trim();
   if (!text || !currentSession) return;
   
-  socket.emit('send-message', { sessionId: currentSession.id, senderId: currentUser.id, text });
+  const user = getCurrentUser();
+  socket.emit('send-message', { sessionId: currentSession.id, senderId: user.id, text });
   input.value = '';
 }
 
 function endSession() {
   if (!currentSession) return;
-  socket.emit('end-session', { sessionId: currentSession.id, userId: currentUser.id });
+  const user = getCurrentUser();
+  socket.emit('end-session', { sessionId: currentSession.id, userId: user.id });
   
   showModal('Оценка', 'Как прошёл разговор?', [1, 2, 3, 4, 5].map(score => ({
     text: `${score} ⭐`,
     action: () => {
-      // Здесь можно добавить отправку оценки на сервер, если нужно
       closeModal();
       currentSession = null;
       showScreen('main-screen');
@@ -210,6 +227,7 @@ function endSession() {
 
 function showReportModal() {
   if (!currentSession) return;
+  const user = getCurrentUser();
   showModal('Пожаловаться', 'Выберите причину:', [
     "Домогательства / непристойное поведение",
     "Оскорбления и агрессия",
@@ -222,7 +240,7 @@ function showReportModal() {
       const htmlSnapshot = document.body.innerHTML;
       socket.emit('report-user', {
         sessionId: currentSession.id,
-        reporterId: currentUser.id,
+        reporterId: user.id,
         reportedId: 'partner_id', 
         reason,
         htmlSnapshot
