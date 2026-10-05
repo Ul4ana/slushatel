@@ -1,1 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Слушатель</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#D9D3CC">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- Экран авторизации -->
+    <section id="auth-screen" class="screen active">
+      <h1>Слушатель</h1>
+      <p class="subtitle">Пространство, где тебя услышат</p>
+      <form id="login-form">
+        <input type="text" id="login-nick" placeholder="Никнейм" required>
+        <input type="password" id="login-pass" placeholder="Пароль" required>
+        <button type="submit" class="btn-primary">Войти</button>
+      </form>
+      <p class="toggle-auth">Нет аккаунта? <span id="show-register">Создать</span></p>
+      
+      <form id="register-form" class="hidden">
+        <input type="text" id="reg-nick" placeholder="Никнейм (3-20 символов)" required maxlength="20">
+        <input type="number" id="reg-age" placeholder="Возраст (11-19)" min="11" max="19" required>
+        <select id="reg-gender" required>
+          <option value="Мужской">Мужской</option>
+          <option value="Женский">Женский</option>
+          <option value="Не указывать">Не указывать</option>
+        </select>
+        <input type="password" id="reg-pass" placeholder="Пароль" required>
+        
+        <div id="avatar-selector">
+          <h3>Выберите аватар</h3>
+          <div class="avatar-options">
+            <button type="button" class="avatar-opt" data-type="emoji">Эмодзи</button>
+            <button type="button" class="avatar-opt" data-type="letter">Буква</button>
+            <button type="button" class="avatar-opt" data-type="auto">Случайный</button>
+          </div>
+          <div id="avatar-customizer" class="hidden">
+            <select id="avatar-bg"></select>
+            <input type="text" id="avatar-content" placeholder="Эмодзи или буква" maxlength="2">
+          </div>
+          <div id="avatar-preview" class="avatar-preview"></div>
+        </div>
 
+        <button type="submit" class="btn-primary">Зарегистрироваться</button>
+      </form>
+    </section>
+
+    <!-- Главный экран -->
+    <section id="main-screen" class="screen hidden">
+      <header>
+        <div id="user-avatar-header" class="avatar-small"></div>
+        <span id="user-nick-header">Ник</span>
+        <button id="logout-btn" class="btn-text">Выйти</button>
+      </header>
+
+      <div id="dashboard">
+        <div id="listener-status" class="card hidden">
+          <h2>Ты: Слушатель</h2>
+          <p>Ожидаем того, кому ты нужен.</p>
+          <button id="stop-listening" class="btn-secondary">Пауза</button>
+        </div>
+
+        <div id="storyteller-panel" class="card">
+          <h2>Мне нужно выговориться</h2>
+          <div class="filters">
+            <select id="pref-gender">
+              <option value="Любой">Любой пол</option>
+              <option value="Мужской">Мужской</option>
+              <option value="Женский">Женский</option>
+            </select>
+            <div class="age-range">
+              <label>Возраст: <span id="age-val">11-15</span></label>
+              <input type="range" id="min-age" min="11" max="19" value="11">
+              <input type="range" id="max-age" min="11" max="19" value="15">
+            </div>
+          </div>
+          <button id="find-listener" class="btn-primary">Найти слушателя</button>
+        </div>
+
+        <div class="card">
+          <h2>Стать слушателем</h2>
+          <p>Пройди мини-курс и тест, чтобы помогать другим.</p>
+          <button id="start-course" class="btn-secondary">Начать обучение</button>
+        </div>
+
+        <button id="open-profile" class="btn-text">Настройки профиля</button>
+      </div>
+    </section>
+
+    <!-- Экран курса -->
+    <section id="course-screen" class="screen hidden">
+      <div id="course-content" class="card">
+        <!-- Динамически заполняется JS -->
+      </div>
+    </section>
+
+    <!-- Экран теста -->
+    <section id="test-screen" class="screen hidden">
+      <div id="test-content" class="card">
+        <!-- Динамически заполняется JS -->
+      </div>
+    </section>
+
+    <!-- Экран чата/звонка -->
+    <section id="chat-screen" class="screen hidden">
+      <header class="chat-header">
+        <button id="end-session-btn" class="btn-danger">Завершить</button>
+        <span id="chat-partner">Собеседник</span>
+        <button id="report-btn" class="btn-icon" title="Пожаловаться">🚩</button>
+      </header>
+      
+      <div id="chat-messages" class="chat-area"></div>
+      
+      <div id="chat-input-area">
+        <button id="sos-btn" class="btn-sos hidden">SOS</button>
+        <input type="text" id="message-input" placeholder="Напиши сообщение...">
+        <button id="send-msg" class="btn-primary">➤</button>
+      </div>
+      
+      <div id="audio-controls" class="hidden">
+        <button id="toggle-mic" class="btn-secondary">Микрофон: Вкл</button>
+        <audio id="remote-audio" autoplay></audio>
+      </div>
+    </section>
+
+    <!-- Экран профиля -->
+    <section id="profile-screen" class="screen hidden">
+      <header>
+        <button id="back-to-main" class="btn-text">← Назад</button>
+        <h2>Профиль</h2>
+      </header>
+      <div class="card">
+        <div id="profile-avatar" class="avatar-large"></div>
+        <form id="profile-form">
+          <input type="text" id="prof-nick" required>
+          <input type="number" id="prof-age" min="11" max="19" required>
+          <select id="prof-gender" required>
+            <option value="Мужской">Мужской</option>
+            <option value="Женский">Женский</option>
+            <option value="Не указывать">Не указывать</option>
+          </select>
+          <button type="submit" class="btn-primary">Сохранить</button>
+        </form>
+        <hr>
+        <button id="donate-btn" class="btn-primary">Поддержать проект</button>
+      </div>
+    </section>
+
+    <!-- Модальные окна -->
+    <div id="modal-overlay" class="hidden">
+      <div id="modal-content" class="card">
+        <h3 id="modal-title"></h3>
+        <p id="modal-text"></p>
+        <div id="modal-actions"></div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
