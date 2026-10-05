@@ -161,7 +161,6 @@ function handleSwipe() {
 export function updateDrawerProfile(user) {
   if (!user) return;
   renderAvatar(user, 'drawer-avatar');
-  // ИСПРАВЛЕНО: Жестко берем реальный никнейм
   document.getElementById('drawer-nick').textContent = user.nickname || 'Пользователь';
   
   if (user.created_at) {
@@ -176,21 +175,7 @@ export function updateDrawerProfile(user) {
 }
 
 // ==========================================
-// ОБНОВЛЕНИЕ ДИАПАЗОНА ВОЗРАСТА
-// ==========================================
-const minAgeSelect = document.getElementById('min-age');
-const maxAgeSelect = document.getElementById('max-age');
-
-function updateAgeDisplay() {
-  // Можно добавить визуальное отображение, если нужно
-  // Например: document.getElementById('age-val').textContent = `${minAgeSelect.value}-${maxAgeSelect.value}`;
-}
-
-minAgeSelect?.addEventListener('change', updateAgeDisplay);
-maxAgeSelect?.addEventListener('change', updateAgeDisplay);
-
-// ==========================================
-// МОДАЛЬНЫЕ ОКНА (ОБНОВЛЕННЫЙ ТЕКСТ "О ПРОЕКТЕ")
+// МОДАЛЬНЫЕ ОКНА
 // ==========================================
 const modalOverlay = document.getElementById('modal-overlay');
 const modalTitle = document.getElementById('modal-title');
@@ -221,7 +206,6 @@ document.querySelectorAll('.drawer-item').forEach(item => {
     const user = getCurrentUser() || {};
     
     if (type === 'profile') {
-      // ИСПРАВЛЕНО: Реальный никнейм пользователя
       const realNick = user.nickname || 'Пользователь';
       const date = user.created_at ? new Date(user.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Неизвестно';
       
@@ -283,7 +267,7 @@ document.querySelectorAll('.drawer-item').forEach(item => {
       `, `<button class="btn-primary modal-sos-btn" onclick="window.open('tel:88002000122')">📞 Позвонить: 8-800-2000-122</button>`);
     }
     
-    // ОБНОВЛЕНО: Новый текст "О проекте"
+    // ТЕКСТ "О ПРОЕКТЕ" — ТОЧНО НА МЕСТЕ
     else if (type === 'about') {
       openModal('О проекте', `
         <div style="text-align: left; line-height: 1.8; font-size: 15px;">
