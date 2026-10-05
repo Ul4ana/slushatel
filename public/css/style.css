@@ -679,3 +679,269 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
     border-radius: var(--radius-xl);
   }
 }
+/* ... (Весь предыдущий CSS остается без изменений до конца файла) ... */
+
+/* =========================================
+   13. БОКОВОЕ МЕНЮ (DRAWER) И БУРГЕР
+   ========================================= */
+
+/* Кнопка-бургер */
+.hamburger-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 12px;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s ease;
+}
+.hamburger-btn:hover { background-color: var(--border-soft); }
+.hamburger-btn span {
+  display: block;
+  width: 20px;
+  height: 1.5px;
+  background-color: var(--text-primary);
+  border-radius: 2px;
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease;
+  transform-origin: center;
+}
+.hamburger-btn.active span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+.hamburger-btn.active span:nth-child(2) { opacity: 0; }
+.hamburger-btn.active span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+
+/* Оверлей */
+#drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 40; /* Ниже шапки (100), но выше контента */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+#drawer-overlay:not(.hidden) {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Сам Drawer */
+#drawer {
+  position: fixed;
+  top: 68px; /* Высота шапки */
+  left: 0;
+  width: 300px;
+  height: calc(100vh - 68px);
+  background-color: var(--surface-card);
+  border-right: 1px solid var(--border-soft);
+  z-index: 50; /* Ниже шапки (100), выше оверлея (40) */
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+#drawer:not(.hidden) {
+  transform: translateX(0);
+}
+
+.drawer-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.drawer-close-btn:hover {
+  background-color: var(--border-soft);
+  color: var(--text-primary);
+}
+
+/* Профиль в Drawer */
+.drawer-profile {
+  padding: 32px 24px 24px;
+  text-align: center;
+}
+.avatar-medium {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0 auto 16px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-on-dark);
+}
+.drawer-nick {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.drawer-date {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.drawer-badge {
+  display: inline-block;
+  background-color: var(--accent-soft);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.02em;
+}
+
+.drawer-divider {
+  height: 1px;
+  background-color: var(--border-soft);
+  margin: 0 24px;
+}
+
+/* Навигация Drawer */
+.drawer-nav {
+  padding: 16px 12px;
+  flex: 1;
+}
+.drawer-item {
+  width: 100%;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 20px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.drawer-item:hover {
+  background-color: var(--bg-secondary);
+}
+.drawer-item:active {
+  transform: scale(0.98);
+}
+.drawer-item svg {
+  color: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+/* Подвал Drawer */
+.drawer-footer {
+  padding: 24px;
+  text-align: center;
+  margin-top: auto;
+}
+.drawer-footer p {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* =========================================
+   14. УЛУЧШЕННЫЕ МОДАЛЬНЫЕ ОКНА
+   ========================================= */
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.modal-close-btn:hover {
+  background-color: var(--border-soft);
+  color: var(--text-primary);
+}
+
+#modal-body {
+  text-align: left;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+#modal-body h4 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+#modal-body p {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.modal-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.modal-actions-grid .btn-primary {
+  margin-top: 0;
+  font-size: 15px;
+  padding: 12px;
+}
+
+.modal-small-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.modal-sos-btn {
+  background-color: var(--error);
+  color: #FFFFFF;
+  width: 100%;
+  margin-top: 16px;
+}
+
+/* Адаптив для Drawer на десктопе */
+@media (min-width: 768px) {
+  #drawer {
+    width: 320px;
+  }
+}
