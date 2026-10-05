@@ -142,10 +142,40 @@
               <option value="Мужской">Мужской</option>
               <option value="Женский">Женский</option>
             </select>
+            <!-- ЗАМЕНЕНО: Два компактных select'а вместо ползунков -->
             <div class="age-range">
-              <label>Возраст: <span id="age-val">11-15</span></label>
-              <input type="range" id="min-age" min="11" max="19" value="11">
-              <input type="range" id="max-age" min="11" max="19" value="15">
+              <label>Возраст собеседника</label>
+              <div class="age-selectors">
+                <div class="age-select-group">
+                  <span class="age-label">От</span>
+                  <select id="min-age">
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="15">15</option>
+                    <option value="16">16</option>
+                    <option value="17">17</option>
+                    <option value="18">18</option>
+                    <option value="19">19</option>
+                  </select>
+                </div>
+                <span class="age-separator">—</span>
+                <div class="age-select-group">
+                  <span class="age-label">До</span>
+                  <select id="max-age">
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="15" selected>15</option>
+                    <option value="16">16</option>
+                    <option value="17">17</option>
+                    <option value="18">18</option>
+                    <option value="19">19</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
           <button id="find-listener" class="btn-primary">Найти слушателя</button>
