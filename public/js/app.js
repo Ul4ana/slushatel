@@ -1,14 +1,12 @@
 // ==========================================
-// УПРАВЛЕНИЕ ТЕМОЙ (Строгий контроль переходов)
+// УПРАВЛЕНИЕ ТЕМОЙ
 // ==========================================
-
 const themeToggleBtn = document.getElementById('theme-toggle');
 const iconSun = themeToggleBtn?.querySelector('.icon-sun');
 const iconMoon = themeToggleBtn?.querySelector('.icon-moon');
 
 function applyTheme(theme) {
   document.body.classList.add('theme-color-transition');
-  
   if (theme === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
     iconSun?.classList.add('hidden');
@@ -19,55 +17,32 @@ function applyTheme(theme) {
     iconMoon?.classList.add('hidden');
   }
   localStorage.setItem('theme', theme);
-  
-  setTimeout(() => {
-    document.body.classList.remove('theme-color-transition');
-  }, 450);
+  setTimeout(() => document.body.classList.remove('theme-color-transition'), 450);
 }
 
 function initTheme() {
   const savedTheme = localStorage.getItem('theme');
   if (savedTheme) {
-    if (savedTheme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      iconSun?.classList.add('hidden');
-      iconMoon?.classList.remove('hidden');
-    } else {
-      iconSun?.classList.remove('hidden');
-      iconMoon?.classList.add('hidden');
-    }
+    applyTheme(savedTheme);
   } else {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (prefersDark) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      iconSun?.classList.add('hidden');
-      iconMoon?.classList.remove('hidden');
-    } else {
-      iconSun?.classList.remove('hidden');
-      iconMoon?.classList.add('hidden');
-    }
+    applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   }
 }
 
 themeToggleBtn?.addEventListener('click', () => {
   const currentTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  applyTheme(newTheme);
+  applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
 });
 
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-  if (!localStorage.getItem('theme')) {
-    applyTheme(e.matches ? 'dark' : 'light');
-  }
+  if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'dark' : 'light');
 });
 
 initTheme();
 
 // ==========================================
-// ИМПОРТЫ И ОСНОВНАЯ ЛОГИКА
+// ИМПОРТЫ
 // ==========================================
-
-// ДОБАВЛЕН ЭТОТ ИМПОРТ, КОТОРОГО НЕ ХВАТАЛО:
 import { initAuth } from './auth.js';
 import { initAvatar } from './avatar.js';
 import { initCourse } from './listener.js';
@@ -75,18 +50,12 @@ import { initChat, initProfile } from './chat.js';
 
 const socket = io();
 
-export function getToken() {
-  return localStorage.getItem('token');
-}
-
+export function getToken() { return localStorage.getItem('token'); }
 export function getCurrentUser() {
   const userStr = localStorage.getItem('currentUser');
   return userStr ? JSON.parse(userStr) : null;
 }
-
-export function setCurrentUser(user) {
-  localStorage.setItem('currentUser', JSON.stringify(user));
-}
+export function setCurrentUser(user) { localStorage.setItem('currentUser', JSON.stringify(user)); }
 
 let currentUser = getCurrentUser();
 let token = getToken();
@@ -99,6 +68,7 @@ if (token) {
       setCurrentUser(user);
       showScreen('main-screen');
       updateUserHeader();
+      updateDrawerProfile(user);
       socket.emit('user-online', user.id);
     })
     .catch(() => {
@@ -144,7 +114,187 @@ function isDark(color) {
 
 export { socket };
 
-// Инициализация всех модулей после загрузки DOM
+// ==========================================
+// ЛОГИКА DRAWER (БОКОВОЕ МЕНЮ)
+// ==========================================
+const drawer = document.getElementById('drawer');
+const drawerOverlay = document.getElementById('drawer-overlay');
+const drawerToggle = document.getElementById('drawer-toggle');
+const drawerCloseBtn = document.getElementById('drawer-close-btn');
+let isDrawerOpen = false;
+
+function openDrawer() {
+  isDrawerOpen = true;
+  drawer.classList.remove('hidden');
+  drawerOverlay.classList.remove('hidden');
+  drawerToggle.classList.add('active');
+  document.body.style.overflow = 'hidden'; // Блокируем скролл страницы
+}
+
+function closeDrawer() {
+  isDrawerOpen = false;
+  drawer.classList.add('hidden');
+  drawerOverlay.classList.add('hidden');
+  drawerToggle.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+drawerToggle?.addEventListener('click', () => isDrawerOpen ? closeDrawer() : openDrawer());
+drawerCloseBtn?.addEventListener('click', closeDrawer);
+drawerOverlay?.addEventListener('click', closeDrawer);
+
+// Закрытие по Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && isDrawerOpen) closeDrawer();
+});
+
+// Свайпы для мобильных устройств
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.addEventListener('touchstart', (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  touchEndX = e.changedTouches[0].screenX;
+  handleSwipe();
+}, { passive: true });
+
+function handleSwipe() {
+  const swipeDistance = touchEndX - touchStartX;
+  // Свайп вправо от левого края (открытие)
+  if (touchStartX < 30 && swipeDistance > 60 && !isDrawerOpen) {
+    openDrawer();
+  }
+  // Свайп влево (закрытие)
+  if (swipeDistance < -60 && isDrawerOpen) {
+    closeDrawer();
+  }
+}
+
+// Обновление профиля в Drawer
+export function updateDrawerProfile(user) {
+  if (!user) return;
+  renderAvatar(user, 'drawer-avatar');
+  document.getElementById('drawer-nick').textContent = user.nickname;
+  
+  if (user.created_at) {
+    const date = new Date(user.created_at);
+    const formattedDate = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+    document.getElementById('drawer-date').textContent = `С нами с ${formattedDate}`;
+  }
+  
+  const badge = document.getElementById('drawer-badge');
+  if (user.is_listener) {
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+}
+
+// ==========================================
+// МОДАЛЬНЫЕ ОКНА ИЗ DRAWER
+// ==========================================
+const modalOverlay = document.getElementById('modal-overlay');
+const modalTitle = document.getElementById('modal-title');
+const modalBody = document.getElementById('modal-body');
+const modalActions = document.getElementById('modal-actions');
+const modalCloseBtn = document.getElementById('modal-close-btn');
+
+function openModal(title, bodyHTML, actionsHTML = '') {
+  modalTitle.textContent = title;
+  modalBody.innerHTML = bodyHTML;
+  modalActions.innerHTML = actionsHTML;
+  modalOverlay.classList.remove('hidden');
+  closeDrawer(); // Закрываем drawer при открытии модалки
+}
+
+function closeModal() {
+  modalOverlay.classList.add('hidden');
+}
+
+modalCloseBtn?.addEventListener('click', closeModal);
+modalOverlay?.addEventListener('click', (e) => {
+  if (e.target === modalOverlay) closeModal();
+});
+
+// Обработчики пунктов меню
+document.querySelectorAll('.drawer-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const type = item.dataset.modal;
+    const user = getCurrentUser();
+    
+    if (type === 'profile') {
+      const date = user.created_at ? new Date(user.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Неизвестно';
+      openModal('Мой профиль', `
+        <div style="text-align: center; margin-bottom: 24px;">
+          <div id="modal-profile-avatar" class="avatar-large" style="margin: 0 auto 16px;"></div>
+          <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 28px;">${user.nickname}</h3>
+          ${user.is_listener ? '<span class="drawer-badge" style="margin-top: 8px;">Слушатель ✓</span>' : ''}
+        </div>
+        <div style="display: grid; gap: 12px; font-size: 15px;">
+          <div><strong>Возраст:</strong> ${user.age} лет</div>
+          <div><strong>Пол:</strong> ${user.gender}</div>
+          <div><strong>Дата регистрации:</strong> ${date}</div>
+        </div>
+      `, `<button class="btn-primary" onclick="document.getElementById('modal-overlay').classList.add('hidden')">Закрыть</button>`);
+      renderAvatar(user, 'modal-profile-avatar');
+    }
+    
+    else if (type === 'settings') {
+      openModal('Настройки', `
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <p style="text-align: center; margin-bottom: 8px;">Тема оформления</p>
+          <div style="display: flex; gap: 8px; justify-content: center;">
+            <button class="btn-secondary" style="width: auto; flex: 1;" onclick="applyTheme('light')">Светлая</button>
+            <button class="btn-secondary" style="width: auto; flex: 1;" onclick="applyTheme('dark')">Тёмная</button>
+          </div>
+          <hr class="divider">
+          <p style="font-size: 13px; color: var(--text-muted); text-align: center;">
+            Чтобы изменить аватар, никнейм или пароль, перейди в раздел «Мой профиль» в главном меню.
+          </p>
+        </div>
+      `, `<button class="btn-danger" onclick="localStorage.removeItem('token'); localStorage.removeItem('currentUser'); window.location.reload();">Выйти из аккаунта</button>`);
+    }
+    
+    else if (type === 'donate') {
+      openModal('Поддержать проект', `
+        <h4>Спасибо, что ты здесь</h4>
+        <p>Приложение "Слушатель" бесплатно навсегда. Но если оно тебе помогло — ты можешь помочь ему жить дальше. Это не обязательно. Это просто благодарность.</p>
+        <div class="modal-actions-grid">
+          <button class="btn-primary">50 ₽</button>
+          <button class="btn-primary">100 ₽</button>
+          <button class="btn-primary">300 ₽</button>
+          <button class="btn-primary">500 ₽</button>
+        </div>
+        <p class="modal-small-text">Платёжный модуль появится позже. Пока что ты можешь просто сказать спасибо — этого достаточно 🤍</p>
+      `, `<button class="btn-secondary" onclick="document.getElementById('modal-overlay').classList.add('hidden')">Понятно</button>`);
+    }
+    
+    else if (type === 'rules') {
+      openModal('Правила и безопасность', `
+        <div style="text-align: left; display: flex; flex-direction: column; gap: 12px;">
+          <p>🌿 <strong>Не осуждай.</strong> Каждое чувство имеет право на существование.</p>
+          <p>👂 <strong>Не перебивай.</strong> Дай человеку выговориться полностью.</p>
+          <p>🚫 <strong>Не давай советов.</strong> Твоя задача — слышать, а не решать проблемы.</p>
+          <p>🔒 <strong>Конфиденциальность.</strong> Всё, что сказано здесь, остаётся здесь.</p>
+          <p>⚠️ <strong>Безопасность.</strong> Ты не психолог. При упоминании самоповреждения мягко предложи горячую линию.</p>
+        </div>
+      `, `<button class="btn-primary modal-sos-btn" onclick="window.open('tel:88002000122')">📞 Позвонить: 8-800-2000-122</button>`);
+    }
+    
+    else if (type === 'about') {
+      openModal('О проекте', `
+        <h4>Слушатель</h4>
+        <p>Анонимная платформа peer-поддержки для подростков. Создана как социальный проект в 2026 году.</p>
+        <p>Наша цель — дать каждому безопасное пространство, где его услышат без оценок и давления. Потому что иногда всё, что нужно — это чтобы кто-то просто был рядом.</p>
+      `, `<button class="btn-primary" onclick="document.getElementById('modal-overlay').classList.add('hidden')">Закрыть</button>`);
+    }
+  });
+});
+
+// Инициализация всех модулей
 document.addEventListener('DOMContentLoaded', () => {
   initAuth();
   initAvatar();
