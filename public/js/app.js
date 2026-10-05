@@ -5,7 +5,6 @@ import { initChat, initProfile } from './chat.js';
 
 const socket = io();
 
-// Надежная функция для получения свежего токена в любой момент
 export function getToken() {
   return localStorage.getItem('token');
 }
@@ -22,7 +21,6 @@ export function setCurrentUser(user) {
 let currentUser = getCurrentUser();
 let token = getToken();
 
-// Проверка сессии при загрузке
 if (token) {
   fetch('/api/profile', { headers: { 'Authorization': `Bearer ${token}` } })
     .then(res => res.ok ? res.json() : Promise.reject())
@@ -51,8 +49,6 @@ export function showScreen(id) {
   if (target) {
     target.classList.remove('hidden');
     target.classList.add('active');
-    // Небольшая задержка для плавной анимации, если она есть
-    setTimeout(() => target.classList.add('active'), 10);
   }
 }
 
@@ -61,16 +57,23 @@ export function updateUserHeader() {
   if (!currentUser) return;
   const nickEl = document.getElementById('user-nick-header');
   if (nickEl) nickEl.textContent = currentUser.nickname;
-  
-  // Импортируем renderAvatar динамически, чтобы избежать циклических зависимостей
-  import('./avatar.js').then(module => {
-    module.renderAvatar(currentUser, 'user-avatar-header');
-  });
+  renderAvatar(currentUser, 'user-avatar-header');
+}
+
+export function renderAvatar(user, elementId) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  el.style.backgroundColor = user.avatar_bg_color;
+  el.style.color = isDark(user.avatar_bg_color) ? '#F5F5F5' : '#2C2C2C';
+  el.textContent = user.avatar_content;
+}
+
+function isDark(color) {
+  return ['#7B7167', '#5E6E5E', '#8B9A8B'].includes(color);
 }
 
 export { socket };
 
-// Инициализация модулей
 document.addEventListener('DOMContentLoaded', () => {
   initAuth();
   initAvatar();
