@@ -1,11 +1,26 @@
 import { initAuth } from './auth.js';
 import { initAvatar } from './avatar.js';
-import { initCourse, initTest } from './listener.js';
+import { initCourse } from './listener.js';
 import { initChat, initProfile } from './chat.js';
 
 const socket = io();
-let currentUser = null;
-let token = localStorage.getItem('token');
+
+// Надежная функция для получения свежего токена в любой момент
+export function getToken() {
+  return localStorage.getItem('token');
+}
+
+export function getCurrentUser() {
+  const userStr = localStorage.getItem('currentUser');
+  return userStr ? JSON.parse(userStr) : null;
+}
+
+export function setCurrentUser(user) {
+  localStorage.setItem('currentUser', JSON.stringify(user));
+}
+
+let currentUser = getCurrentUser();
+let token = getToken();
 
 // Проверка сессии при загрузке
 if (token) {
@@ -13,12 +28,14 @@ if (token) {
     .then(res => res.ok ? res.json() : Promise.reject())
     .then(user => {
       currentUser = user;
+      setCurrentUser(user);
       showScreen('main-screen');
       updateUserHeader();
       socket.emit('user-online', user.id);
     })
     .catch(() => {
       localStorage.removeItem('token');
+      localStorage.removeItem('currentUser');
       showScreen('auth-screen');
     });
 } else {
@@ -26,38 +43,38 @@ if (token) {
 }
 
 export function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active', 'hidden'));
-  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
-  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.classList.add('hidden');
+  });
+  const target = document.getElementById(id);
+  if (target) {
+    target.classList.remove('hidden');
+    target.classList.add('active');
+    // Небольшая задержка для плавной анимации, если она есть
+    setTimeout(() => target.classList.add('active'), 10);
+  }
 }
 
 export function updateUserHeader() {
+  currentUser = getCurrentUser();
   if (!currentUser) return;
-  document.getElementById('user-nick-header').textContent = currentUser.nickname;
-  renderAvatar(currentUser, 'user-avatar-header');
+  const nickEl = document.getElementById('user-nick-header');
+  if (nickEl) nickEl.textContent = currentUser.nickname;
+  
+  // Импортируем renderAvatar динамически, чтобы избежать циклических зависимостей
+  import('./avatar.js').then(module => {
+    module.renderAvatar(currentUser, 'user-avatar-header');
+  });
 }
 
-export function renderAvatar(user, elementId) {
-  const el = document.getElementById(elementId);
-  if (!el) return;
-  el.style.backgroundColor = user.avatar_bg_color;
-  el.style.color = isDark(user.avatar_bg_color) ? '#F5F5F5' : '#2C2C2C';
-  el.textContent = user.avatar_content;
-}
-
-function isDark(color) {
-  return ['#7B7167', '#5E6E5E', '#8B9A8B'].includes(color);
-}
-
-export { socket, currentUser, token };
+export { socket };
 
 // Инициализация модулей
 document.addEventListener('DOMContentLoaded', () => {
   initAuth();
   initAvatar();
   initCourse();
-  initTest();
   initChat();
   initProfile();
 });
