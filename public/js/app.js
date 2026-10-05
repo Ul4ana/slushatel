@@ -1,4 +1,55 @@
-import { initAuth } from './auth.js';
+// ==========================================
+// УПРАВЛЕНИЕ ТЕМОЙ (Светлая / Тёмная)
+// ==========================================
+
+const themeToggleBtn = document.getElementById('theme-toggle');
+const iconSun = themeToggleBtn?.querySelector('.icon-sun');
+const iconMoon = themeToggleBtn?.querySelector('.icon-moon');
+
+// Функция применения темы
+function applyTheme(theme) {
+  if (theme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    iconSun?.classList.add('hidden');
+    iconMoon?.classList.remove('hidden');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    iconSun?.classList.remove('hidden');
+    iconMoon?.classList.add('hidden');
+  }
+  localStorage.setItem('theme', theme);
+}
+
+// Инициализация темы при загрузке
+function initTheme() {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    applyTheme(savedTheme);
+  } else {
+    // По умолчанию системная тема
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(prefersDark ? 'dark' : 'light');
+  }
+}
+
+// Обработчик переключения
+themeToggleBtn?.addEventListener('click', () => {
+  const currentTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  applyTheme(newTheme);
+});
+
+// Слушатель изменений системной темы (если пользователь не выбрал тему вручную)
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+  if (!localStorage.getItem('theme')) {
+    applyTheme(e.matches ? 'dark' : 'light');
+  }
+});
+
+// Запуск инициализации
+initTheme();
+
+// ... ДАЛЕЕ ВАШ СУЩЕСТВУЮЩИЙ КОД ...import { initAuth } from './auth.js';
 import { initAvatar } from './avatar.js';
 import { initCourse } from './listener.js';
 import { initChat, initProfile } from './chat.js';
