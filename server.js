@@ -20,7 +20,6 @@ app.use('/peerjs', peerServer);
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey_slushatel_2026';
 
-// Middleware для проверки JWT
 const authenticate = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'Нет токена' });
@@ -31,9 +30,6 @@ const authenticate = (req, res, next) => {
   });
 };
 
-// --- API ROUTES ---
-
-// Валидация никнейма
 app.post('/api/validate-nickname', (req, res) => {
   const { nickname } = req.body;
   const regex = /^[a-zA-Zа-яА-ЯёЁ0-9_]{3,20}$/;
@@ -46,10 +42,8 @@ app.post('/api/validate-nickname', (req, res) => {
   });
 });
 
-// Регистрация
 app.post('/api/register', async (req, res) => {
   const { nickname, password, age, gender, avatar_type, avatar_bg_color, avatar_content, fingerprint } = req.body;
-  
   if (age < 11 || age > 19) return res.status(400).json({ error: 'Возраст должен быть от 11 до 19 лет.' });
   
   const fpHash = hashString(fingerprint);
@@ -62,20 +56,17 @@ app.post('/api/register', async (req, res) => {
           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, 
     [nickname, hash, age, gender, avatar_type, avatar_bg_color, avatar_content, fpHash], 
     function(err) {
-      if (err) return res.status(400).json({ error: 'Пожалуйста, выбери другой никнейм. Этот не подходит.' });
+      if (err) return res.status(400).json({ error: 'Пожалуйста, выбери другой никнейм.' });
       const token = jwt.sign({ id: this.lastID, nickname }, JWT_SECRET, { expiresIn: '24h' });
       res.json({ token, user: { id: this.lastID, nickname, age, gender, avatar_type, avatar_bg_color, avatar_content, is_listener: false } });
     }
   );
 });
 
-// Вход
 app.post('/api/login', async (req, res) => {
   const { nickname, password, fingerprint } = req.body;
   db.get("SELECT * FROM users WHERE nickname = ?", [nickname], async (err, user) => {
     if (!user) return res.status(400).json({ error: 'Неверные данные' });
-    
-    // Проверка бана
     if (user.is_banned) return res.status(403).json({ error: 'Аккаунт заблокирован.' });
     
     const valid = await bcrypt.compare(password, user.password_hash);
@@ -89,9 +80,9 @@ app.post('/api/login', async (req, res) => {
   });
 });
 
-// Профиль
+// ОБНОВЛЕНО: добавлено created_at
 app.get('/api/profile', authenticate, (req, res) => {
-  db.get("SELECT id, nickname, age, gender, avatar_type, avatar_bg_color, avatar_content, is_listener FROM users WHERE id = ?", [req.user.id], (err, user) => {
+  db.get("SELECT id, nickname, age, gender, avatar_type, avatar_bg_color, avatar_content, is_listener, created_at FROM users WHERE id = ?", [req.user.id], (err, user) => {
     res.json(user);
   });
 });
@@ -107,29 +98,23 @@ app.put('/api/profile', authenticate, (req, res) => {
     });
 });
 
-// Получение вопросов теста
 app.get('/api/questions', authenticate, (req, res) => {
   db.all("SELECT id, question_text, option_a, option_b, option_c, option_d, related_step FROM test_questions ORDER BY RANDOM() LIMIT 7", (err, rows) => {
     res.json(rows);
   });
 });
 
-// Проверка теста
 app.post('/api/check-test', authenticate, (req, res) => {
-  const { answers } = req.body; // { questionId: 'A' }
+  const { answers } = req.body;
   let correctCount = 0;
   let wrongStep = null;
-  
   const qIds = Object.keys(answers);
   const placeholders = qIds.map(() => '?').join(',');
   
   db.all(`SELECT id, correct_option, related_step FROM test_questions WHERE id IN (${placeholders})`, qIds, (err, rows) => {
     rows.forEach(row => {
-      if (answers[row.id] === row.correct_option) {
-        correctCount++;
-      } else {
-        wrongStep = row.related_step;
-      }
+      if (answers[row.id] === row.correct_option) correctCount++;
+      else wrongStep = row.related_step;
     });
     
     if (correctCount >= 6) {
@@ -141,7 +126,6 @@ app.post('/api/check-test', authenticate, (req, res) => {
   });
 });
 
-// Поиск слушателей
 app.get('/api/online-listeners', authenticate, (req, res) => {
   const { prefGender, minAge, maxAge } = req.query;
   if (maxAge - minAge > 4) return res.status(400).json({ error: 'Разница возрастов не более 4 лет' });
@@ -157,15 +141,12 @@ app.get('/api/online-listeners', authenticate, (req, res) => {
   query += ` AND age >= ? AND age <= ?`;
   params.push(minAge, maxAge);
 
-  db.all(query, params, (err, rows) => {
-    res.json(rows);
-  });
+  db.all(query, params, (err, rows) => res.json(rows));
 });
 
-// --- SOCKET.IO LOGIC ---
-const activeSessions = {}; // sessionId -> { storytellerId, listenerId, mode, chatLog: [], callLog: [] }
-const userSockets = {}; // userId -> socketId
-const reportAttempts = {}; // userId -> { count, resetTime }
+const activeSessions = {};
+const userSockets = {};
+const reportAttempts = {};
 
 io.on('connection', (socket) => {
   socket.on('user-online', (userId) => {
@@ -175,26 +156,18 @@ io.on('connection', (socket) => {
 
   socket.on('request-session', (data) => {
     const { storytellerId, listenerId, mode } = data;
-    
-    // Проверка теневого бана
     db.get("SELECT is_shadow_banned FROM users WHERE id = ?", [listenerId], (err, row) => {
-      if (row.is_shadow_banned) {
+      if (row && row.is_shadow_banned) {
         io.to(userSockets[storytellerId]).emit('session-rejected', { reason: 'Слушатель пока не готов. Ищем дальше...' });
         return;
       }
-
       const sessionId = Date.now().toString();
       activeSessions[sessionId] = { storytellerId, listenerId, mode, chatLog: [], callLog: [] };
+      db.run("INSERT INTO sessions (id, storyteller_id, listener_id, mode) VALUES (?, ?, ?, ?)", [sessionId, storytellerId, listenerId, mode]);
       
-      db.run("INSERT INTO sessions (id, storyteller_id, listener_id, mode) VALUES (?, ?, ?, ?)", 
-        [sessionId, storytellerId, listenerId, mode]);
-
       const listenerSocket = userSockets[listenerId];
-      if (listenerSocket) {
-        io.to(listenerSocket).emit('session-request', { sessionId, storytellerId, mode });
-      } else {
-        io.to(userSockets[storytellerId]).emit('session-rejected', { reason: 'Слушатель оффлайн. Ищем дальше...' });
-      }
+      if (listenerSocket) io.to(listenerSocket).emit('session-request', { sessionId, storytellerId, mode });
+      else io.to(userSockets[storytellerId]).emit('session-rejected', { reason: 'Слушатель оффлайн.' });
     });
   });
 
@@ -219,18 +192,14 @@ io.on('connection', (socket) => {
     const session = activeSessions[sessionId];
     if (!session) return;
 
-    // Проверка на плохие слова
     db.all("SELECT word FROM bad_words", (err, rows) => {
       const lowerText = text.toLowerCase();
       const hasBadWord = rows.some(row => lowerText.includes(row.word));
       
       if (hasBadWord) {
-        io.to(userSockets[senderId]).emit('message-blocked', { warning: 'Твоё сообщение содержит неподобающие слова. Пожалуйста, переформулируй.' });
-        
-        // Логика 3 попыток за 5 минут
+        io.to(userSockets[senderId]).emit('message-blocked', { warning: 'Сообщение содержит неподобающие слова.' });
         if (!reportAttempts[senderId]) reportAttempts[senderId] = { count: 0, resetTime: Date.now() + 300000 };
         if (Date.now() > reportAttempts[senderId].resetTime) reportAttempts[senderId] = { count: 0, resetTime: Date.now() + 300000 };
-        
         reportAttempts[senderId].count++;
         if (reportAttempts[senderId].count >= 3) {
           db.run("UPDATE users SET is_shadow_banned = 1, ban_expires = datetime('now', '+24 hours') WHERE id = ?", [senderId]);
@@ -242,7 +211,6 @@ io.on('connection', (socket) => {
       const timestamp = new Date().toISOString();
       session.chatLog.push({ senderId, text, timestamp });
       db.run("INSERT INTO messages (session_id, sender_id, text) VALUES (?, ?, ?)", [sessionId, senderId, text]);
-      
       io.to(userSockets[session.storytellerId]).emit('new-message', { senderId, text, timestamp });
       io.to(userSockets[session.listenerId]).emit('new-message', { senderId, text, timestamp });
     });
@@ -250,23 +218,19 @@ io.on('connection', (socket) => {
 
   socket.on('webrtc-signal', (data) => {
     const { targetId, signal } = data;
-    if (userSockets[targetId]) {
-      io.to(userSockets[targetId]).emit('webrtc-signal', { from: socket.userId, signal });
-    }
+    if (userSockets[targetId]) io.to(userSockets[targetId]).emit('webrtc-signal', { from: socket.userId, signal });
   });
 
   socket.on('log-call-event', (data) => {
     const { sessionId, event } = data;
-    if (activeSessions[sessionId]) {
-      activeSessions[sessionId].callLog.push({ ...event, timestamp: new Date().toISOString() });
-    }
+    if (activeSessions[sessionId]) activeSessions[sessionId].callLog.push({ ...event, timestamp: new Date().toISOString() });
   });
 
   socket.on('sos-triggered', (data) => {
     const { sessionId } = data;
     const session = activeSessions[sessionId];
     if (session) {
-      const sysMsg = "Пожалуйста, позвони на горячую линию психологической поддержки: 8-800-2000-122. Ты важен. Этот разговор не заменит профессиональную помощь, но мы здесь.";
+      const sysMsg = "Пожалуйста, позвони на горячую линию: 8-800-2000-122. Ты важен.";
       io.to(userSockets[session.storytellerId]).emit('new-message', { senderId: 'system', text: sysMsg, timestamp: new Date().toISOString() });
       io.to(userSockets[session.listenerId]).emit('new-message', { senderId: 'system', text: sysMsg, timestamp: new Date().toISOString() });
     }
@@ -275,35 +239,21 @@ io.on('connection', (socket) => {
   socket.on('report-user', async (data) => {
     const { sessionId, reporterId, reportedId, reason, htmlSnapshot } = data;
     const session = activeSessions[sessionId];
-    
     const chatLogJson = JSON.stringify(session ? session.chatLog : []);
     const callLogJson = JSON.stringify(session ? session.callLog : []);
 
-    db.run(`INSERT INTO reported_sessions (reported_user_id, reporter_user_id, session_id, chat_log, call_log, html_snapshot) 
-            VALUES (?, ?, ?, ?, ?, ?)`,
+    db.run(`INSERT INTO reported_sessions (reported_user_id, reporter_user_id, session_id, chat_log, call_log, html_snapshot) VALUES (?, ?, ?, ?, ?, ?)`,
       [reportedId, reporterId, sessionId, chatLogJson, callLogJson, htmlSnapshot], function(err) {
         const evidenceId = this.lastID;
-        db.run(`INSERT INTO reports (reporter_id, reported_id, session_id, reason, evidence_log_id) 
-                VALUES (?, ?, ?, ?, ?)`, [reporterId, reportedId, sessionId, reason, evidenceId]);
+        db.run(`INSERT INTO reports (reporter_id, reported_id, session_id, reason, evidence_log_id) VALUES (?, ?, ?, ?, ?)`, [reporterId, reportedId, sessionId, reason, evidenceId]);
 
-        // Логика банов
         db.all(`SELECT reason FROM reports WHERE reported_id = ? AND timestamp > datetime('now', '-24 hours')`, [reportedId], (err, rows) => {
           const harassmentCount = rows.filter(r => r.reason === 'Домогательства / непристойное поведение').length;
-          const totalCount = rows.length;
-
-          if (harassmentCount >= 2) {
-            db.run("UPDATE users SET is_banned = 1 WHERE id = ?", [reportedId]);
-            // Добавить в banned_users
-          } else if (harassmentCount === 1) {
-            db.run("UPDATE users SET is_shadow_banned = 1 WHERE id = ?", [reportedId]);
-          } else if (totalCount >= 3) {
-            db.run("UPDATE users SET is_banned = 1, ban_expires = datetime('now', '+48 hours') WHERE id = ?", [reportedId]);
-          } else if (totalCount >= 5) {
-            db.run("UPDATE users SET is_banned = 1 WHERE id = ?", [reportedId]);
-          }
+          if (harassmentCount >= 2) db.run("UPDATE users SET is_banned = 1 WHERE id = ?", [reportedId]);
+          else if (harassmentCount === 1) db.run("UPDATE users SET is_shadow_banned = 1 WHERE id = ?", [reportedId]);
+          else if (rows.length >= 5) db.run("UPDATE users SET is_banned = 1 WHERE id = ?", [reportedId]);
         });
       });
-    
     io.to(userSockets[reporterId]).emit('report-success');
   });
 
@@ -313,7 +263,6 @@ io.on('connection', (socket) => {
     if (session) {
       db.run("UPDATE sessions SET ended_at = CURRENT_TIMESTAMP, status = 'ended' WHERE id = ?", [sessionId]);
       db.run("UPDATE users SET is_busy = 0 WHERE id IN (?, ?)", [session.storytellerId, session.listenerId]);
-      
       io.to(userSockets[session.storytellerId]).emit('session-ended', { sessionId });
       io.to(userSockets[session.listenerId]).emit('session-ended', { sessionId });
       delete activeSessions[sessionId];
