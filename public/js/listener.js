@@ -34,12 +34,12 @@ function renderCourseStep() {
       currentStep++;
       renderCourseStep();
     } else {
-      startTest();
+      initTest();
     }
   });
 }
 
-async function startTest() {
+export async function initTest() {
   showScreen('test-screen');
   const res = await fetch('/api/questions', { headers: { 'Authorization': `Bearer ${token}` } });
   testQuestions = await res.json();
@@ -90,6 +90,10 @@ async function submitTest() {
       <p>Пересмотри Шаг ${data.wrongStep} и попробуй снова. Мы в тебя верим.</p>
       <button id="retry-course" class="btn-primary">Пройти курс заново</button>
     `;
-    document.getElementById('retry-course').addEventListener('click', initCourse);
+    document.getElementById('retry-course').addEventListener('click', () => {
+      currentStep = 0;
+      renderCourseStep();
+      showScreen('course-screen');
+    });
   }
 }
