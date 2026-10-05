@@ -88,17 +88,38 @@
           </select>
           <input type="password" id="reg-pass" placeholder="Пароль" required autocomplete="new-password">
           
+          <!-- НОВЫЙ ДИЗАЙН ВЫБОРА АВАТАРА -->
           <div id="avatar-selector">
             <h3>Выберите аватар</h3>
-            <div class="avatar-options">
-              <button type="button" class="avatar-opt btn-secondary" data-type="emoji">Эмодзи</button>
-              <button type="button" class="avatar-opt btn-secondary" data-type="letter">Буква</button>
-              <button type="button" class="avatar-opt btn-secondary" data-type="auto">Случайный</button>
+            
+            <!-- Переключатель типа -->
+            <div class="avatar-type-toggle">
+              <button type="button" class="avatar-type-btn active" data-type="emoji">Эмодзи</button>
+              <button type="button" class="avatar-type-btn" data-type="letter">Буква</button>
+              <button type="button" class="avatar-type-btn" data-type="auto">Случайный</button>
             </div>
+            
+            <!-- Круглое поле для ввода -->
             <div id="avatar-customizer" class="hidden">
-              <select id="avatar-bg"></select>
-              <input type="text" id="avatar-content" placeholder="Эмодзи или буква" maxlength="2">
+              <div class="avatar-content-input-wrapper">
+                <input type="text" id="avatar-content" placeholder="🌸" maxlength="2">
+              </div>
             </div>
+            
+            <!-- Ползунок цветов -->
+            <div class="avatar-color-slider">
+              <label class="slider-label">Цвет фона</label>
+              <input type="range" id="avatar-bg" min="0" max="4" step="1" value="0">
+              <div class="color-preview-dots">
+                <span style="background: #D9D3CC"></span>
+                <span style="background: #B6ADA5"></span>
+                <span style="background: #7B7167"></span>
+                <span style="background: #5E6E5E"></span>
+                <span style="background: #8B9A8B"></span>
+              </div>
+            </div>
+            
+            <!-- Превью -->
             <div id="avatar-preview" class="avatar-preview"></div>
           </div>
 
@@ -142,7 +163,6 @@
               <option value="Мужской">Мужской</option>
               <option value="Женский">Женский</option>
             </select>
-            <!-- ЗАМЕНЕНО: Два компактных select'а вместо ползунков -->
             <div class="age-range">
               <label>Возраст собеседника</label>
               <div class="age-selectors">
