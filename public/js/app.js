@@ -1,13 +1,15 @@
 // ==========================================
-// УПРАВЛЕНИЕ ТЕМОЙ (Светлая / Тёмная)
+// УПРАВЛЕНИЕ ТЕМОЙ (Строгий контроль переходов)
 // ==========================================
 
 const themeToggleBtn = document.getElementById('theme-toggle');
 const iconSun = themeToggleBtn?.querySelector('.icon-sun');
 const iconMoon = themeToggleBtn?.querySelector('.icon-moon');
 
-// Функция применения темы
 function applyTheme(theme) {
+  // 1. Добавляем класс, который включает ТОЛЬКО цветовые переходы
+  document.body.classList.add('theme-color-transition');
+  
   if (theme === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
     iconSun?.classList.add('hidden');
@@ -18,38 +20,54 @@ function applyTheme(theme) {
     iconMoon?.classList.add('hidden');
   }
   localStorage.setItem('theme', theme);
+  
+  // 2. Убираем класс после завершения перехода (400мс), 
+  // чтобы обычные hover-эффекты (transform) работали мгновенно
+  setTimeout(() => {
+    document.body.classList.remove('theme-color-transition');
+  }, 450);
 }
 
-// Инициализация темы при загрузке
 function initTheme() {
   const savedTheme = localStorage.getItem('theme');
   if (savedTheme) {
-    applyTheme(savedTheme);
+    // Применяем без анимации при первой загрузке
+    if (savedTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      iconSun?.classList.add('hidden');
+      iconMoon?.classList.remove('hidden');
+    } else {
+      iconSun?.classList.remove('hidden');
+      iconMoon?.classList.add('hidden');
+    }
   } else {
-    // По умолчанию системная тема
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    applyTheme(prefersDark ? 'dark' : 'light');
+    if (prefersDark) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      iconSun?.classList.add('hidden');
+      iconMoon?.classList.remove('hidden');
+    } else {
+      iconSun?.classList.remove('hidden');
+      iconMoon?.classList.add('hidden');
+    }
   }
 }
 
-// Обработчик переключения
 themeToggleBtn?.addEventListener('click', () => {
   const currentTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
   const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
   applyTheme(newTheme);
 });
 
-// Слушатель изменений системной темы (если пользователь не выбрал тему вручную)
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
   if (!localStorage.getItem('theme')) {
     applyTheme(e.matches ? 'dark' : 'light');
   }
 });
 
-// Запуск инициализации
 initTheme();
 
-// ... ДАЛЕЕ ВАШ СУЩЕСТВУЮЩИЙ КОД ...import { initAuth } from './auth.js';
+// ... ДАЛЕЕ ВАШ СУЩЕСТВУЮЩИЙ КОД ...
 import { initAvatar } from './avatar.js';
 import { initCourse } from './listener.js';
 import { initChat, initProfile } from './chat.js';
