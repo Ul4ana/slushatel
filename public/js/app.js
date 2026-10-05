@@ -128,7 +128,7 @@ function openDrawer() {
   drawer.classList.remove('hidden');
   drawerOverlay.classList.remove('hidden');
   drawerToggle.classList.add('active');
-  document.body.style.overflow = 'hidden'; // Блокируем скролл страницы
+  document.body.style.overflow = 'hidden';
 }
 
 function closeDrawer() {
@@ -143,37 +143,21 @@ drawerToggle?.addEventListener('click', () => isDrawerOpen ? closeDrawer() : ope
 drawerCloseBtn?.addEventListener('click', closeDrawer);
 drawerOverlay?.addEventListener('click', closeDrawer);
 
-// Закрытие по Escape
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && isDrawerOpen) closeDrawer();
 });
 
-// Свайпы для мобильных устройств
 let touchStartX = 0;
 let touchEndX = 0;
-
-document.addEventListener('touchstart', (e) => {
-  touchStartX = e.changedTouches[0].screenX;
-}, { passive: true });
-
-document.addEventListener('touchend', (e) => {
-  touchEndX = e.changedTouches[0].screenX;
-  handleSwipe();
-}, { passive: true });
+document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+document.addEventListener('touchend', (e) => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); }, { passive: true });
 
 function handleSwipe() {
   const swipeDistance = touchEndX - touchStartX;
-  // Свайп вправо от левого края (открытие)
-  if (touchStartX < 30 && swipeDistance > 60 && !isDrawerOpen) {
-    openDrawer();
-  }
-  // Свайп влево (закрытие)
-  if (swipeDistance < -60 && isDrawerOpen) {
-    closeDrawer();
-  }
+  if (touchStartX < 30 && swipeDistance > 60 && !isDrawerOpen) openDrawer();
+  if (swipeDistance < -60 && isDrawerOpen) closeDrawer();
 }
 
-// Обновление профиля в Drawer
 export function updateDrawerProfile(user) {
   if (!user) return;
   renderAvatar(user, 'drawer-avatar');
@@ -186,15 +170,12 @@ export function updateDrawerProfile(user) {
   }
   
   const badge = document.getElementById('drawer-badge');
-  if (user.is_listener) {
-    badge.classList.remove('hidden');
-  } else {
-    badge.classList.add('hidden');
-  }
+  if (user.is_listener) badge.classList.remove('hidden');
+  else badge.classList.add('hidden');
 }
 
 // ==========================================
-// МОДАЛЬНЫЕ ОКНА ИЗ DRAWER
+// МОДАЛЬНЫЕ ОКНА (ИДЕАЛЬНОЕ ЦЕНТРИРОВАНИЕ)
 // ==========================================
 const modalOverlay = document.getElementById('modal-overlay');
 const modalTitle = document.getElementById('modal-title');
@@ -207,7 +188,7 @@ function openModal(title, bodyHTML, actionsHTML = '') {
   modalBody.innerHTML = bodyHTML;
   modalActions.innerHTML = actionsHTML;
   modalOverlay.classList.remove('hidden');
-  closeDrawer(); // Закрываем drawer при открытии модалки
+  closeDrawer();
 }
 
 function closeModal() {
@@ -219,43 +200,47 @@ modalOverlay?.addEventListener('click', (e) => {
   if (e.target === modalOverlay) closeModal();
 });
 
-// Обработчики пунктов меню
 document.querySelectorAll('.drawer-item').forEach(item => {
   item.addEventListener('click', () => {
     const type = item.dataset.modal;
-    const user = getCurrentUser();
+    const user = getCurrentUser() || {};
     
     if (type === 'profile') {
+      // ИСПРАВЛЕНО: Берем реальный никнейм, а не слово "Никнейм"
+      const realNick = user.nickname || 'Пользователь';
       const date = user.created_at ? new Date(user.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Неизвестно';
+      
       openModal('Мой профиль', `
         <div style="text-align: center; margin-bottom: 24px;">
-          <div id="modal-profile-avatar" class="avatar-large" style="margin: 0 auto 16px;"></div>
-          <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 28px;">${user.nickname}</h3>
-          ${user.is_listener ? '<span class="drawer-badge" style="margin-top: 8px;">Слушатель ✓</span>' : ''}
+          <div id="modal-profile-avatar" class="avatar-large" style="margin: 0 auto 20px;"></div>
+          <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 600; text-align: center; margin-bottom: 8px;">${realNick}</h3>
+          ${user.is_listener ? '<span class="drawer-badge">Слушатель ✓</span>' : ''}
         </div>
-        <div style="display: grid; gap: 12px; font-size: 15px;">
-          <div><strong>Возраст:</strong> ${user.age} лет</div>
-          <div><strong>Пол:</strong> ${user.gender}</div>
-          <div><strong>Дата регистрации:</strong> ${date}</div>
+        <div style="display: flex; flex-direction: column; gap: 16px; font-size: 15px; text-align: center; color: var(--text-secondary);">
+          <div><strong style="color: var(--text-primary);">Возраст:</strong> ${user.age || '—'} лет</div>
+          <div><strong style="color: var(--text-primary);">Пол:</strong> ${user.gender || '—'}</div>
+          <div><strong style="color: var(--text-primary);">Дата регистрации:</strong> ${date}</div>
         </div>
-      `, `<button class="btn-primary" onclick="document.getElementById('modal-overlay').classList.add('hidden')">Закрыть</button>`);
-      renderAvatar(user, 'modal-profile-avatar');
+      `, `<button class="btn-primary" onclick="document.getElementById('modal-overlay').classList.add('hidden')" style="max-width: 200px; margin: 0 auto;">Закрыть</button>`);
+      
+      // Небольшая задержка, чтобы элемент успел отрисоваться перед рендером аватара
+      setTimeout(() => renderAvatar(user, 'modal-profile-avatar'), 50);
     }
     
     else if (type === 'settings') {
       openModal('Настройки', `
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <p style="text-align: center; margin-bottom: 8px;">Тема оформления</p>
-          <div style="display: flex; gap: 8px; justify-content: center;">
-            <button class="btn-secondary" style="width: auto; flex: 1;" onclick="applyTheme('light')">Светлая</button>
-            <button class="btn-secondary" style="width: auto; flex: 1;" onclick="applyTheme('dark')">Тёмная</button>
+        <div style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
+          <p style="margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">Тема оформления</p>
+          <div style="display: flex; gap: 12px; width: 100%;">
+            <button class="btn-secondary" style="flex: 1;" onclick="applyTheme('light')">Светлая</button>
+            <button class="btn-secondary" style="flex: 1;" onclick="applyTheme('dark')">Тёмная</button>
           </div>
-          <hr class="divider">
-          <p style="font-size: 13px; color: var(--text-muted); text-align: center;">
-            Чтобы изменить аватар, никнейм или пароль, перейди в раздел «Мой профиль» в главном меню.
+          <hr class="divider" style="width: 100%;">
+          <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6;">
+            Чтобы изменить аватар, никнейм или пароль, используй раздел «Мой профиль» в главном меню приложения.
           </p>
         </div>
-      `, `<button class="btn-danger" onclick="localStorage.removeItem('token'); localStorage.removeItem('currentUser'); window.location.reload();">Выйти из аккаунта</button>`);
+      `, `<button class="btn-danger" onclick="localStorage.removeItem('token'); localStorage.removeItem('currentUser'); window.location.reload();" style="max-width: 240px; margin: 0 auto;">Выйти из аккаунта</button>`);
     }
     
     else if (type === 'donate') {
@@ -269,12 +254,12 @@ document.querySelectorAll('.drawer-item').forEach(item => {
           <button class="btn-primary">500 ₽</button>
         </div>
         <p class="modal-small-text">Платёжный модуль появится позже. Пока что ты можешь просто сказать спасибо — этого достаточно 🤍</p>
-      `, `<button class="btn-secondary" onclick="document.getElementById('modal-overlay').classList.add('hidden')">Понятно</button>`);
+      `, `<button class="btn-secondary" onclick="document.getElementById('modal-overlay').classList.add('hidden')" style="max-width: 200px; margin: 0 auto;">Понятно</button>`);
     }
     
     else if (type === 'rules') {
       openModal('Правила и безопасность', `
-        <div style="text-align: left; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; flex-direction: column; gap: 16px; text-align: center;">
           <p>🌿 <strong>Не осуждай.</strong> Каждое чувство имеет право на существование.</p>
           <p>👂 <strong>Не перебивай.</strong> Дай человеку выговориться полностью.</p>
           <p>🚫 <strong>Не давай советов.</strong> Твоя задача — слышать, а не решать проблемы.</p>
@@ -289,7 +274,7 @@ document.querySelectorAll('.drawer-item').forEach(item => {
         <h4>Слушатель</h4>
         <p>Анонимная платформа peer-поддержки для подростков. Создана как социальный проект в 2026 году.</p>
         <p>Наша цель — дать каждому безопасное пространство, где его услышат без оценок и давления. Потому что иногда всё, что нужно — это чтобы кто-то просто был рядом.</p>
-      `, `<button class="btn-primary" onclick="document.getElementById('modal-overlay').classList.add('hidden')">Закрыть</button>`);
+      `, `<button class="btn-primary" onclick="document.getElementById('modal-overlay').classList.add('hidden')" style="max-width: 200px; margin: 0 auto;">Закрыть</button>`);
     }
   });
 });
