@@ -8,41 +8,57 @@ export function initAvatar() {
   ];
   const emojis = ['😚', '😌', '😊', '💋', '🫂', '😺', '😸', '😽', '🌸', '🌺', '🌊', '🪐', '🐚', '🪷', '🪽', '🦢', '🕊️', '🦌', '🩰', '🎧', '🩹', '🎀', '🤍', '🪩', '🕯️'];
 
-  window.selectedAvatarType = 'auto';
-  window.selectedAvatarBg = colors[Math.floor(Math.random() * colors.length)].hex;
-  window.selectedAvatarContent = emojis[Math.floor(Math.random() * emojis.length)];
+  // Инициализация значений по умолчанию
+  window.selectedAvatarType = 'emoji';
+  window.selectedAvatarBg = colors[0].hex;
+  window.selectedAvatarContent = '🌸';
 
-  const bgSelect = document.getElementById('avatar-bg');
-  colors.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.hex;
-    opt.textContent = c.name;
-    bgSelect.appendChild(opt);
-  });
+  const bgSlider = document.getElementById('avatar-bg');
+  const contentInput = document.getElementById('avatar-content');
+  const customizer = document.getElementById('avatar-customizer');
 
-  document.querySelectorAll('.avatar-opt').forEach(btn => {
+  // Обработчик переключения типа
+  document.querySelectorAll('.avatar-type-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      // Убираем active у всех кнопок
+      document.querySelectorAll('.avatar-type-btn').forEach(b => b.classList.remove('active'));
+      // Добавляем active к текущей
+      btn.classList.add('active');
+      
       window.selectedAvatarType = btn.dataset.type;
-      document.getElementById('avatar-customizer').classList.toggle('hidden', window.selectedAvatarType === 'auto');
+      
+      // Показываем/скрываем кастомизатор
+      if (window.selectedAvatarType === 'auto') {
+        customizer.classList.add('hidden');
+        // Выбираем случайные значения
+        window.selectedAvatarBg = colors[Math.floor(Math.random() * colors.length)].hex;
+        window.selectedAvatarContent = emojis[Math.floor(Math.random() * emojis.length)];
+        bgSlider.value = colors.findIndex(c => c.hex === window.selectedAvatarBg);
+        contentInput.value = '';
+      } else {
+        customizer.classList.remove('hidden');
+        // Обновляем плейсхолдер в зависимости от типа
+        contentInput.placeholder = window.selectedAvatarType === 'emoji' ? '🌸' : 'A';
+      }
+      
       updatePreview();
     });
   });
 
-  bgSelect.addEventListener('change', () => {
-    window.selectedAvatarBg = bgSelect.value;
+  // Обработчик ползунка цветов
+  bgSlider.addEventListener('input', () => {
+    const colorIndex = parseInt(bgSlider.value);
+    window.selectedAvatarBg = colors[colorIndex].hex;
     updatePreview();
   });
 
-  document.getElementById('avatar-content').addEventListener('input', (e) => {
+  // Обработчик ввода в круглое поле
+  contentInput.addEventListener('input', (e) => {
     window.selectedAvatarContent = e.target.value.toUpperCase();
     updatePreview();
   });
 
   function updatePreview() {
-    if (window.selectedAvatarType === 'auto') {
-      window.selectedAvatarBg = colors[Math.floor(Math.random() * colors.length)].hex;
-      window.selectedAvatarContent = emojis[Math.floor(Math.random() * emojis.length)];
-    }
     const preview = document.getElementById('avatar-preview');
     preview.style.backgroundColor = window.selectedAvatarBg;
     preview.style.color = isDark(window.selectedAvatarBg) ? '#F5F5F5' : '#2C2C2C';
@@ -53,5 +69,6 @@ export function initAvatar() {
     return ['#7B7167', '#5E6E5E', '#8B9A8B'].includes(color);
   }
 
+  // Первоначальное обновление превью
   updatePreview();
 }
