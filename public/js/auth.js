@@ -1,4 +1,4 @@
-import { showScreen, updateUserHeader, socket } from './app.js';
+import { showScreen, updateUserHeader, socket, setCurrentUser } from './app.js';
 
 export function initAuth() {
   const loginForm = document.getElementById('login-form');
@@ -23,8 +23,7 @@ export function initAuth() {
     const data = await res.json();
     if (res.ok) {
       localStorage.setItem('token', data.token);
-      window.currentUser = data.user;
-      window.token = data.token;
+      setCurrentUser(data.user);
       showScreen('main-screen');
       updateUserHeader();
       socket.emit('user-online', data.user.id);
@@ -37,7 +36,6 @@ export function initAuth() {
     e.preventDefault();
     const nickname = document.getElementById('reg-nick').value;
     
-    // Валидация на клиенте
     const valRes = await fetch('/api/validate-nickname', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -68,8 +66,7 @@ export function initAuth() {
     const data = await res.json();
     if (res.ok) {
       localStorage.setItem('token', data.token);
-      window.currentUser = data.user;
-      window.token = data.token;
+      setCurrentUser(data.user);
       showScreen('main-screen');
       updateUserHeader();
       socket.emit('user-online', data.user.id);
@@ -80,6 +77,7 @@ export function initAuth() {
 
   document.getElementById('logout-btn').addEventListener('click', () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('currentUser');
     window.location.reload();
   });
 }
