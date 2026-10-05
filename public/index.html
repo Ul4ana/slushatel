@@ -8,7 +8,6 @@
   <title>Слушатель</title>
   <link rel="manifest" href="/manifest.json">
   
-  <!-- Подключение премиальных шрифтов -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -19,6 +18,51 @@
 </head>
 <body>
   <div id="app">
+    
+    <!-- БОКОВОЕ МЕНЮ (DRAWER) -->
+    <div id="drawer-overlay" class="hidden"></div>
+    <aside id="drawer" class="hidden">
+      <button id="drawer-close-btn" class="drawer-close-btn" aria-label="Закрыть меню">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      
+      <div class="drawer-profile">
+        <div id="drawer-avatar" class="avatar-medium"></div>
+        <h3 id="drawer-nick" class="drawer-nick">Никнейм</h3>
+        <p id="drawer-date" class="drawer-date">С нами с ...</p>
+        <span id="drawer-badge" class="drawer-badge hidden">Слушатель ✓</span>
+      </div>
+      
+      <div class="drawer-divider"></div>
+      
+      <nav class="drawer-nav">
+        <button class="drawer-item" data-modal="profile">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Мой профиль</span>
+        </button>
+        <button class="drawer-item" data-modal="settings">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Настройки</span>
+        </button>
+        <button class="drawer-item" data-modal="donate">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span>Поддержать проект</span>
+        </button>
+        <button class="drawer-item" data-modal="rules">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Правила и безопасность</span>
+        </button>
+        <button class="drawer-item" data-modal="about">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>О проекте</span>
+        </button>
+      </nav>
+      
+      <div class="drawer-footer">
+        <p>Сделано с заботой. © 2026 Слушатель</p>
+      </div>
+    </aside>
+
     <!-- Экран авторизации -->
     <section id="auth-screen" class="screen active">
       <div class="auth-container">
@@ -67,6 +111,9 @@
     <section id="main-screen" class="screen hidden">
       <header class="main-header">
         <div class="header-left">
+          <button id="drawer-toggle" class="hamburger-btn" aria-label="Открыть меню">
+            <span></span><span></span><span></span>
+          </button>
           <span class="app-title-small">Слушатель</span>
         </div>
         <div class="header-right">
@@ -116,16 +163,12 @@
 
     <!-- Экран курса -->
     <section id="course-screen" class="screen hidden">
-      <div id="course-content" class="card course-slide">
-        <!-- Динамически заполняется JS -->
-      </div>
+      <div id="course-content" class="card course-slide"></div>
     </section>
 
     <!-- Экран теста -->
     <section id="test-screen" class="screen hidden">
-      <div id="test-content" class="card">
-        <!-- Динамически заполняется JS -->
-      </div>
+      <div id="test-content" class="card"></div>
     </section>
 
     <!-- Экран чата/звонка -->
@@ -177,11 +220,14 @@
       </div>
     </section>
 
-    <!-- Модальные окна -->
+    <!-- Универсальное модальное окно -->
     <div id="modal-overlay" class="hidden">
       <div id="modal-content" class="card modal-card">
+        <button id="modal-close-btn" class="modal-close-btn" aria-label="Закрыть">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
         <h3 id="modal-title"></h3>
-        <p id="modal-text"></p>
+        <div id="modal-body"></div>
         <div id="modal-actions"></div>
       </div>
     </div>
