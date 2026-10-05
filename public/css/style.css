@@ -1,8 +1,8 @@
 /* =========================================
-   1. CSS ПЕРЕМЕННЫЕ И ТЕМЫ
+   1. CSS ПЕРЕМЕННЫЕ: НОВАЯ ГЕОМЕТРИЯ И МЯГКОСТЬ
    ========================================= */
 :root {
-  /* Светлая тема: чуть более тёплая и мягкая */
+  /* Благородная светлая палитра */
   --bg-primary: #F4F1EC;
   --bg-secondary: #E8E4DE;
   --bg-tertiary: #D1C9C1;
@@ -15,27 +15,27 @@
   --text-secondary: #5A5A5A;
   --text-muted: #8A8A8A;
   --text-on-dark: #FFFFFF;
-  --border-soft: rgba(94, 110, 94, 0.12);
+  --border-soft: rgba(94, 110, 94, 0.08); /* Ещё мягче и незаметнее */
   --success: #6B8B6B;
   --error: #C48A8A;
   
-  /* Геометрия: чуть более округлая для мягкости */
-  --radius-sm: 12px;
-  --radius-md: 18px;
-  --radius-lg: 28px;
-  --radius-xl: 36px;
-  --radius-full: 9999px;
+  /* ГЕОМЕТРИЯ ПЕРФЕКЦИОНИСТА (Hyper-rounded, органичные формы) */
+  --radius-sm: 14px;   /* Бейджи, мелкие элементы */
+  --radius-md: 22px;   /* Кнопки, поля ввода (форма "пилюли") */
+  --radius-lg: 32px;   /* Карточки */
+  --radius-xl: 40px;   /* Модальные окна, крупные контейнеры */
+  --radius-full: 9999px; /* Аватары, полные круги */
   
-  /* Тени: цветные, сверхмягкие, без грязи */
-  --shadow-sm: 0 2px 8px rgba(94, 110, 94, 0.04);
-  --shadow-md: 0 8px 24px rgba(94, 110, 94, 0.06);
-  --shadow-lg: 0 16px 48px rgba(94, 110, 94, 0.08);
+  /* ТЕНИ: Сверхдиффузные, цветные, без чёрной грязи */
+  --shadow-sm: 0 4px 12px rgba(94, 110, 94, 0.04);
+  --shadow-md: 0 12px 32px rgba(94, 110, 94, 0.06);
+  --shadow-lg: 0 24px 64px rgba(94, 110, 94, 0.08);
   
   color-scheme: light dark;
 }
 
 [data-theme="dark"] {
-  /* Тёмная тема: глубокий, мягкий угольно-зелёный, не чёрный */
+  /* Благородная тёмная палитра */
   --bg-primary: #242824;
   --bg-secondary: #2E332E;
   --bg-tertiary: #3A403A;
@@ -48,17 +48,17 @@
   --text-secondary: #B8B5AE;
   --text-muted: #8A8780;
   --text-on-dark: #242824;
-  --border-soft: rgba(168, 188, 168, 0.10);
+  --border-soft: rgba(168, 188, 168, 0.08);
   --success: #8FB08F;
   --error: #D49A9A;
   
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.25);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.35);
 }
 
 /* =========================================
-   2. БАЗОВЫЕ СТИЛИ И МЯГКАЯ ТИПОГРАФИКА
+   2. БАЗА И ТИПОГРАФИКА (Строгий ритм)
    ========================================= */
 * {
   box-sizing: border-box;
@@ -71,51 +71,48 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  line-height: 1.65;
+  line-height: 1.6; /* Строгий ритм */
   font-size: 16px;
   min-height: 100vh;
-  
-  /* МАГИЯ МЯГКОСТИ ШРИФТА */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  font-variant-numeric: tabular-nums;
 }
 
-/* СТРОГИЙ КОНТРОЛЬ ПЕРЕХОДОВ: Меняются ТОЛЬКО цвета. 
-   Никаких transform, width, height, padding. Это гарантирует 0 сдвигов макета. */
-body, .card, input, select, button, .avatar-small, .avatar-large, .avatar-preview {
-  transition-property: color, background-color, border-color, box-shadow, fill, stroke, background-image;
+/* СТРОГИЙ КОНТРОЛЬ: анимируем ТОЛЬКО цвета и тени. Никаких сдвигов макета. */
+body, .card, input, select, button, .avatar-small, .avatar-large, .avatar-preview, .avatar-medium {
+  transition-property: color, background-color, border-color, box-shadow, fill, stroke, background-image, transform;
   transition-duration: 0.4s;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 h1, h2, h3, .app-title, .app-title-small {
   font-family: 'Cormorant Garamond', serif;
-  font-weight: 500; /* Средний вес вместо жирного для элегантности */
+  font-weight: 500;
   color: var(--text-primary);
-  line-height: 1.25;
-  letter-spacing: 0.02em; /* Лёгкий воздух между буквами */
+  line-height: 1.2;
+  letter-spacing: 0.02em;
 }
 
-h1 { font-size: 36px; }
-h2 { font-size: 26px; margin-bottom: 12px; }
-h3 { font-size: 22px; margin-bottom: 10px; }
+h1 { font-size: 40px; }
+h2 { font-size: 28px; margin-bottom: 16px; }
+h3 { font-size: 22px; margin-bottom: 12px; }
 
 p { 
   color: var(--text-secondary); 
   margin-bottom: 16px; 
-  letter-spacing: 0.01em; /* Микро-воздух для читаемости */
+  letter-spacing: 0.01em;
+  line-height: 1.7;
 }
 
 /* =========================================
-   3. УТИЛИТЫ И АНИМАЦИИ ПОЯВЛЕНИЯ
+   3. УТИЛИТЫ И АНИМАЦИИ
    ========================================= */
 .hidden { display: none !important; }
 
 .screen {
   display: none;
-  padding: 20px;
+  padding: 24px; /* Кратность 8 */
   min-height: 100vh;
   width: 100%;
   max-width: 640px;
@@ -128,7 +125,7 @@ p {
 }
 
 @keyframes softFadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -137,29 +134,28 @@ p {
 }
 
 /* =========================================
-   4. КОМПОНЕНТЫ: КНОПКИ
+   4. КОМПОНЕНТЫ: КНОПКИ (Форма "Пилюли")
    ========================================= */
 button {
   font-family: 'Inter', system-ui, sans-serif;
   cursor: pointer;
   border: none;
   outline: none;
-  min-height: 48px; /* Увеличено для ещё большего комфорта нажатия */
+  min-height: 52px; /* Увеличено для идеального тапа */
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
   font-weight: 500;
   font-size: 16px;
-  letter-spacing: 0.015em;
+  letter-spacing: 0.02em;
 }
 
 .btn-primary, .btn-secondary, .btn-danger, .btn-sos {
-  padding: 16px 28px;
+  padding: 16px 32px;
   width: 100%;
-  margin-top: 12px;
-  /* Анимация наведения отделена от анимации темы */
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.4s ease, box-shadow 0.4s ease;
+  margin-top: 16px;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.4s ease, box-shadow 0.4s ease;
 }
 
 .btn-primary {
@@ -195,15 +191,16 @@ button {
   color: #FFFFFF;
   font-weight: 600;
   width: auto;
-  padding: 16px 24px;
+  padding: 16px 28px;
   letter-spacing: 0.08em;
+  border-radius: var(--radius-full); /* SOS всегда полностью круглый */
 }
 
 .btn-text {
   background: transparent;
   color: var(--accent-primary);
   font-weight: 500;
-  padding: 8px 16px;
+  padding: 12px 16px;
   width: auto;
   border-radius: var(--radius-sm);
   transition: background-color 0.2s ease, color 0.4s ease;
@@ -212,7 +209,7 @@ button {
 
 .center-btn {
   display: block;
-  margin: 24px auto 0;
+  margin: 32px auto 0;
   width: auto;
 }
 
@@ -244,7 +241,7 @@ button {
 
 button:focus-visible, input:focus-visible, select:focus-visible {
   outline: 2px solid var(--accent-primary);
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
 
 /* =========================================
@@ -252,8 +249,8 @@ button:focus-visible, input:focus-visible, select:focus-visible {
    ========================================= */
 input, select {
   width: 100%;
-  padding: 16px 20px;
-  margin-bottom: 14px;
+  padding: 18px 24px; /* Больше воздуха внутри */
+  margin-bottom: 16px;
   border: 1.5px solid transparent;
   border-radius: var(--radius-md);
   background-color: var(--bg-secondary);
@@ -265,31 +262,37 @@ input, select {
 }
 
 input::placeholder, select { color: var(--text-muted); }
-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238A8A8A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; }
+select { 
+  appearance: none; 
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238A8A8A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); 
+  background-repeat: no-repeat; 
+  background-position: right 20px center; 
+  padding-right: 48px; 
+}
 
 input:focus, select:focus {
   border-color: var(--accent-primary);
   background-color: var(--surface-card);
-  box-shadow: 0 0 0 4px rgba(94, 110, 94, 0.08);
+  box-shadow: 0 0 0 4px rgba(94, 110, 94, 0.06);
   outline: none;
 }
 
 [data-theme="dark"] input:focus,
 [data-theme="dark"] select:focus {
-  box-shadow: 0 0 0 4px rgba(168, 188, 168, 0.10);
+  box-shadow: 0 0 0 4px rgba(168, 188, 168, 0.08);
 }
 
 .age-range {
-  margin: 20px 0;
-  padding: 20px;
+  margin: 24px 0;
+  padding: 24px;
   background-color: var(--surface-elevated);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-soft);
 }
 .age-range label {
   display: block;
   font-weight: 500;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   color: var(--text-primary);
   font-size: 15px;
 }
@@ -299,15 +302,15 @@ input[type="range"] {
   height: 6px;
   background: var(--bg-tertiary);
   border-radius: var(--radius-full);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   padding: 0;
   border: none;
   transition: background 0.4s ease;
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   background: var(--surface-card);
   border: 2px solid var(--accent-primary);
   border-radius: 50%;
@@ -323,35 +326,39 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 .card {
   background-color: var(--surface-card);
   border-radius: var(--radius-lg);
-  padding: 28px;
-  margin-bottom: 20px;
+  padding: 32px; /* Строго 32px для воздуха */
+  margin-bottom: 24px;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-soft);
-  /* Анимация наведения отделена от темы */
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, background-color 0.4s ease, border-color 0.4s ease;
 }
 
 .card:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-3px);
+  transform: translateY(-4px);
 }
 
 .main-header {
-  height: 68px;
+  height: 72px; /* Чуть выше для премиальности */
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: var(--surface-card);
   border-radius: var(--radius-lg);
   padding: 0 24px;
-  margin: -20px -20px 24px -20px;
+  margin: -24px -24px 32px -24px;
   box-shadow: var(--shadow-sm);
   border-bottom: 1px solid var(--border-soft);
   transition: background-color 0.4s ease, border-color 0.4s ease;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
 .header-left .app-title-small {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -359,7 +366,7 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 .header-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .user-nick {
@@ -373,7 +380,7 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 /* =========================================
    7. КОМПОНЕНТЫ: АВАТАРЫ
    ========================================= */
-.avatar-preview, .avatar-small, .avatar-large {
+.avatar-preview, .avatar-small, .avatar-large, .avatar-medium {
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
@@ -385,25 +392,26 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.4s ease, color 0.4s ease;
 }
 
-.avatar-preview:hover, .avatar-small:hover, .avatar-large:hover {
+.avatar-preview:hover, .avatar-small:hover, .avatar-large:hover, .avatar-medium:hover {
   transform: scale(1.08);
 }
 
-.avatar-preview { width: 84px; height: 84px; font-size: 36px; margin: 20px auto; }
-.avatar-small { width: 42px; height: 42px; font-size: 18px; flex-shrink: 0; }
-.avatar-large { width: 128px; height: 128px; font-size: 52px; margin: 0 auto 28px; }
+.avatar-preview { width: 88px; height: 88px; font-size: 36px; margin: 24px auto; }
+.avatar-small { width: 44px; height: 44px; font-size: 18px; flex-shrink: 0; }
+.avatar-medium { width: 72px; height: 72px; font-size: 32px; margin: 0 auto 20px; }
+.avatar-large { width: 136px; height: 136px; font-size: 56px; margin: 0 auto 32px; }
 
 .avatar-options {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
 }
 .avatar-options .btn-secondary {
   width: auto;
   flex: 1;
   margin-top: 0;
-  padding: 12px 16px;
+  padding: 14px 16px;
   font-size: 14px;
 }
 
@@ -419,7 +427,7 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 }
 
 .app-title {
-  font-size: 48px;
+  font-size: 52px;
   margin-bottom: 8px;
   color: var(--accent-primary);
   transition: color 0.4s ease;
@@ -431,14 +439,14 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
   font-style: italic;
   font-weight: 400;
   color: var(--text-secondary);
-  margin-bottom: 40px;
+  margin-bottom: 48px;
   letter-spacing: 0.03em;
   transition: color 0.4s ease;
 }
 
 .toggle-auth {
   text-align: center;
-  margin-top: 28px;
+  margin-top: 32px;
   color: var(--text-secondary);
   font-size: 15px;
   transition: color 0.4s ease;
@@ -459,14 +467,14 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
    9. ЧАТ
    ========================================= */
 .chat-header {
-  height: 68px;
+  height: 72px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: var(--surface-card);
   border-radius: var(--radius-lg);
-  padding: 0 20px;
-  margin: -20px -20px 20px -20px;
+  padding: 0 24px;
+  margin: -24px -24px 24px -24px;
   box-shadow: var(--shadow-sm);
   border-bottom: 1px solid var(--border-soft);
   transition: background-color 0.4s ease, border-color 0.4s ease;
@@ -474,7 +482,7 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 
 .chat-partner-name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 600;
   color: var(--text-primary);
   flex: 1;
@@ -483,16 +491,16 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 }
 
 .chat-area {
-  height: calc(100vh - 240px);
+  height: calc(100vh - 260px);
   min-height: 400px;
   overflow-y: auto;
   background-color: var(--bg-primary);
   border-radius: var(--radius-lg);
-  padding: 20px;
-  margin-bottom: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   border: 1px solid var(--border-soft);
   transition: background-color 0.4s ease, border-color 0.4s ease;
 }
@@ -503,9 +511,9 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 
 .message {
   max-width: 82%;
-  padding: 14px 18px;
+  padding: 16px 20px;
   font-size: 15px;
-  line-height: 1.55;
+  line-height: 1.6;
   animation: softFadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   word-wrap: break-word;
   transition: background-color 0.4s ease, color 0.4s ease;
@@ -515,14 +523,14 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
   align-self: flex-end;
   background-color: var(--accent-primary);
   color: var(--text-on-dark);
-  border-radius: 20px 20px 6px 20px;
+  border-radius: 24px 24px 6px 24px; /* Органичный хвостик */
 }
 
 .message.theirs {
   align-self: flex-start;
   background-color: var(--bg-secondary);
   color: var(--text-primary);
-  border-radius: 20px 20px 20px 6px;
+  border-radius: 24px 24px 24px 6px; /* Органичный хвостик */
 }
 
 .message.system {
@@ -532,16 +540,16 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
   text-align: center;
   font-size: 13px;
   border-radius: var(--radius-full);
-  padding: 8px 18px;
+  padding: 8px 20px;
   border: 1px solid var(--border-soft);
 }
 
 #chat-input-area {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: flex-end;
   background-color: var(--surface-card);
-  padding: 14px;
+  padding: 16px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-soft);
   box-shadow: var(--shadow-sm);
@@ -559,28 +567,28 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
    ========================================= */
 .course-slide {
   text-align: center;
-  max-width: 500px;
-  margin: 40px auto;
-  padding: 40px 32px;
+  max-width: 520px;
+  margin: 48px auto;
+  padding: 48px 40px;
 }
 
 .course-slide .slide-emoji {
-  font-size: 72px;
-  margin-bottom: 28px;
+  font-size: 80px;
+  margin-bottom: 32px;
   display: block;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.05));
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.06));
 }
 
 .course-slide h2 {
-  font-size: 30px;
-  margin-bottom: 20px;
+  font-size: 32px;
+  margin-bottom: 24px;
 }
 
 .course-slide p {
   font-size: 17px;
-  line-height: 1.75;
+  line-height: 1.8;
   color: var(--text-secondary);
-  margin-bottom: 36px;
+  margin-bottom: 40px;
 }
 
 /* =========================================
@@ -592,9 +600,9 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(30, 30, 30, 0.5); /* Нейтральное затемнение */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background-color: rgba(30, 30, 30, 0.5);
+  backdrop-filter: blur(12px); /* Сильнее размытие для премиальности */
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -612,111 +620,130 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 
 .modal-card {
   background-color: var(--surface-elevated);
-  border-radius: var(--radius-xl);
-  padding: 36px 28px;
-  max-width: 420px;
+  border-radius: var(--radius-xl); /* 40px - супер-скругление */
+  padding: 40px 32px;
+  max-width: 440px;
   width: 100%;
   text-align: center;
   box-shadow: var(--shadow-lg);
-  transform: scale(0.95) translateY(10px);
+  transform: scale(0.96) translateY(12px);
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease;
   border: 1px solid var(--border-soft);
+  position: relative;
 }
 
 #modal-overlay:not(.hidden) .modal-card {
   transform: scale(1) translateY(0);
 }
 
-#modal-actions {
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-secondary);
   display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-top: 28px;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.modal-close-btn:hover {
+  background-color: var(--border-soft);
+  color: var(--text-primary);
+}
+
+#modal-body {
+  text-align: left;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+#modal-body h4 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+#modal-body p {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.modal-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.modal-actions-grid .btn-primary {
+  margin-top: 0;
+  font-size: 15px;
+  padding: 14px;
+}
+
+.modal-small-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.modal-sos-btn {
+  background-color: var(--error);
+  color: #FFFFFF;
+  width: 100%;
+  margin-top: 20px;
+  border-radius: var(--radius-full);
 }
 
 .divider {
   border: none;
   border-top: 1px solid var(--border-soft);
-  margin: 28px 0;
+  margin: 32px 0;
   transition: border-color 0.4s ease;
 }
 
 /* =========================================
-   12. АДАПТИВНОСТЬ (DESKTOP)
+   12. БОКОВОЕ МЕНЮ (DRAWER) - Перфекционизм
    ========================================= */
-@media (min-width: 768px) {
-  body {
-    padding: 48px 24px;
-    background-color: var(--bg-secondary);
-  }
-  
-  #app {
-    max-width: 680px;
-    margin: 0 auto;
-    background-color: var(--bg-primary);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
-    overflow: hidden;
-    min-height: 80vh;
-    transition: background-color 0.4s ease, box-shadow 0.4s ease;
-  }
-
-  .screen {
-    padding: 40px;
-  }
-
-  .main-header, .chat-header {
-    margin: -40px -40px 32px -40px;
-    border-radius: 0;
-  }
-
-  .btn-primary, .btn-secondary, .btn-danger {
-    width: auto;
-    min-width: 220px;
-  }
-  
-  #chat-input-area {
-    border-radius: var(--radius-xl);
-  }
-}
-/* ... (Весь предыдущий CSS остается без изменений до конца файла) ... */
-
-/* =========================================
-   13. БОКОВОЕ МЕНЮ (DRAWER) И БУРГЕР
-   ========================================= */
-
-/* Кнопка-бургер */
 .hamburger-btn {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   background: transparent;
   border: none;
   cursor: pointer;
   padding: 0;
-  margin-right: 12px;
+  margin-right: 16px;
   border-radius: var(--radius-sm);
   transition: background-color 0.2s ease;
 }
 .hamburger-btn:hover { background-color: var(--border-soft); }
 .hamburger-btn span {
   display: block;
-  width: 20px;
-  height: 1.5px;
+  width: 22px;
+  height: 2px;
   background-color: var(--text-primary);
-  border-radius: 2px;
+  border-radius: 4px; /* Скругленные концы линий */
   transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease;
   transform-origin: center;
 }
-.hamburger-btn.active span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+.hamburger-btn.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 .hamburger-btn.active span:nth-child(2) { opacity: 0; }
-.hamburger-btn.active span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+.hamburger-btn.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-/* Оверлей */
 #drawer-overlay {
   position: fixed;
   top: 0;
@@ -724,45 +751,42 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  z-index: 40; /* Ниже шапки (100), но выше контента */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 40;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
-#drawer-overlay:not(.hidden) {
-  opacity: 1;
-  visibility: visible;
-}
+#drawer-overlay:not(.hidden) { opacity: 1; visibility: visible; }
 
-/* Сам Drawer */
 #drawer {
   position: fixed;
-  top: 68px; /* Высота шапки */
+  top: 72px;
   left: 0;
   width: 300px;
-  height: calc(100vh - 68px);
+  height: calc(100vh - 72px);
   background-color: var(--surface-card);
+  /* Скругляем правый край drawer для органичности */
+  border-top-right-radius: var(--radius-xl);
+  border-bottom-right-radius: var(--radius-xl);
   border-right: 1px solid var(--border-soft);
-  z-index: 50; /* Ниже шапки (100), выше оверлея (40) */
+  z-index: 50;
   transform: translateX(-100%);
-  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   box-shadow: var(--shadow-lg);
 }
-#drawer:not(.hidden) {
-  transform: translateX(0);
-}
+#drawer:not(.hidden) { transform: translateX(0); }
 
 .drawer-close-btn {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 36px;
-  height: 36px;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-full);
   background: transparent;
   color: var(--text-secondary);
@@ -776,35 +800,22 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
   color: var(--text-primary);
 }
 
-/* Профиль в Drawer */
 .drawer-profile {
-  padding: 32px 24px 24px;
+  padding: 40px 24px 32px;
   text-align: center;
-}
-.avatar-medium {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 auto 16px;
-  background-color: var(--bg-tertiary);
-  color: var(--text-on-dark);
 }
 .drawer-nick {
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 .drawer-date {
   font-size: 13px;
   color: var(--text-muted);
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  letter-spacing: 0.02em;
 }
 .drawer-badge {
   display: inline-block;
@@ -812,9 +823,10 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
   color: #FFFFFF;
   font-size: 11px;
   font-weight: 600;
-  padding: 4px 10px;
+  padding: 6px 14px;
   border-radius: var(--radius-full);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .drawer-divider {
@@ -823,18 +835,17 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
   margin: 0 24px;
 }
 
-/* Навигация Drawer */
 .drawer-nav {
-  padding: 16px 12px;
+  padding: 20px 16px;
   flex: 1;
 }
 .drawer-item {
   width: 100%;
-  height: 52px;
+  height: 56px; /* Кратность 8 */
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 0 20px;
+  gap: 16px;
+  padding: 0 24px;
   background: transparent;
   border: none;
   border-radius: var(--radius-md);
@@ -857,9 +868,8 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
   flex-shrink: 0;
 }
 
-/* Подвал Drawer */
 .drawer-footer {
-  padding: 24px;
+  padding: 32px 24px;
   text-align: center;
   margin-top: auto;
 }
@@ -867,81 +877,48 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
   font-size: 12px;
   color: var(--text-muted);
   margin: 0;
+  letter-spacing: 0.03em;
 }
 
 /* =========================================
-   14. УЛУЧШЕННЫЕ МОДАЛЬНЫЕ ОКНА
+   13. АДАПТИВНОСТЬ (DESKTOP)
    ========================================= */
-.modal-close-btn {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-full);
-  background: transparent;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-.modal-close-btn:hover {
-  background-color: var(--border-soft);
-  color: var(--text-primary);
-}
-
-#modal-body {
-  text-align: left;
-  color: var(--text-secondary);
-  font-size: 15px;
-  line-height: 1.6;
-  margin-bottom: 24px;
-}
-
-#modal-body h4 {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 24px;
-  color: var(--text-primary);
-  margin-bottom: 12px;
-  text-align: center;
-}
-
-#modal-body p {
-  text-align: center;
-  margin-bottom: 24px;
-}
-
-.modal-actions-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.modal-actions-grid .btn-primary {
-  margin-top: 0;
-  font-size: 15px;
-  padding: 12px;
-}
-
-.modal-small-text {
-  font-size: 13px;
-  color: var(--text-muted);
-  text-align: center;
-  line-height: 1.5;
-}
-
-.modal-sos-btn {
-  background-color: var(--error);
-  color: #FFFFFF;
-  width: 100%;
-  margin-top: 16px;
-}
-
-/* Адаптив для Drawer на десктопе */
 @media (min-width: 768px) {
+  body {
+    padding: 48px 32px;
+    background-color: var(--bg-secondary);
+  }
+  
+  #app {
+    max-width: 680px;
+    margin: 0 auto;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    min-height: 80vh;
+    transition: background-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .screen {
+    padding: 40px;
+  }
+
+  .main-header, .chat-header {
+    margin: -40px -40px 40px -40px;
+    border-radius: 0;
+  }
+
+  .btn-primary, .btn-secondary, .btn-danger {
+    width: auto;
+    min-width: 240px;
+  }
+  
+  #chat-input-area {
+    border-radius: var(--radius-xl);
+  }
+
   #drawer {
-    width: 320px;
+    width: 340px;
   }
 }
